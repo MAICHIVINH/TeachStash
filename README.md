@@ -3,8 +3,47 @@
 Ứng dụng Windows Desktop **offline** cho giáo viên Tin học THPT: lưu trữ, phân loại, tìm kiếm và tái sử dụng giáo án, bài giảng, bài tập, đề kiểm tra, tài liệu tham khảo và mã nguồn mẫu.
 
 - **Backend:** .NET 9, ASP.NET Core Minimal API, EF Core + SQLite, FluentValidation (Clean Architecture)
-- **Frontend:** React 18 + TypeScript + Vite + Tailwind CSS 4 + Zustand, PDF.js, highlight.js
-- **Desktop:** WPF + WebView2 (server nội bộ chạy cùng tiến trình trên `127.0.0.1`, cổng tự động)
+- **Frontend:** React 18 + TypeScript + Vite + Tailwind CSS 4 + Zustand, PDF.js, highlight.js, Lucide Icons
+- **Desktop:** WPF + WebView2 (server nội bộ chạy cùng tiến trình trên `127.0.0.1`, cổng ưu tiên cố định `5080`)
+- **Cloud Sync:** Tích hợp Google Drive API v3 (OAuth 2.0 PKCE / Loopback & Auth Code) sao lưu an toàn lên đám mây
+
+---
+
+## 🌟 Các tính năng chính (Key Features)
+
+### 1. Quản lý tài liệu & giáo án đa định dạng
+- Phân loại tài liệu theo **Loại** (Giáo án, Bài giảng, Đề kiểm tra, Bài tập, Chuyên đề...), **Khối lớp** (10, 11, 12), **Chủ đề** và **Bài học**.
+- Hỗ trợ xem trước (preview) trực tiếp trong ứng dụng:
+  - **Tài liệu văn phòng:** PDF, Word (.docx), Excel (.xlsx, .xls), PowerPoint (.pptx).
+  - **Hình ảnh & Văn bản thuần:** PNG, JPG, SVG, TXT, Markdown, CSV, JSON.
+  - **Mã nguồn:** Tự động tô màu cú pháp (Syntax Highlighting) cho C++, Python, Pascal, C#, Java, JavaScript, HTML/CSS, SQL.
+- Quản lý tệp vật lý an toàn bằng mã định danh GUID, chống trùng lặp và thất lạc tệp tin.
+
+### 2. Ngân hàng bài tập & đề luyện tập (Exercises Bank)
+- Giao diện trực quan hỗ trợ 2 chế độ hiển thị linh hoạt: **Dạng lưới thẻ (Grid Cards)** và **Dạng bảng chi tiết (Table View)**.
+- Phân cấp 4 mức độ nhận thức chuẩn sư phạm: **Nhận biết**, **Thông hiểu**, **Vận dụng**, **Vận dụng cao** kèm thanh lọc nhanh trực quan.
+- Tích hợp trích đoạn đề bài, gợi ý giải thuật, lời giải chi tiết và mã nguồn mẫu.
+- Nút **Sao chép đề bài nhanh** vào khay nhớ tạm để giáo viên dán ngay vào giáo án hoặc đề thi Word/PowerPoint.
+
+### 3. Kho mã nguồn mẫu (Code Snippets)
+- Lưu trữ các thuật toán, bài giải mẫu, đoạn code mẫu giảng dạy theo từng ngôn ngữ (Python, C++, Pascal...).
+- Trình biên tập mã nguồn thông minh (giữ thụt lề, hỗ trợ Tab thụt dòng 4 dấu cách) và nút sao chép mã nguồn nhanh 1-click.
+
+### 4. Tìm kiếm thông minh & Thẻ nhãn (Tags)
+- Tìm kiếm toàn văn (Full-text Search) siêu tốc, tự động bỏ dấu tiếng Việt (ví dụ: gõ `"giao an"` vẫn tìm thấy `"giáo án"`).
+- Hệ thống gắn thẻ (Tags) linh hoạt giúp gom nhóm học liệu theo chuyên đề liên môn hoặc đợt ôn thi.
+
+### 5. Sao lưu nội bộ & Đồng bộ đám mây cá nhân (Google Drive Cloud Backup)
+- **Sao lưu ngoại tuyến (Local Backup):** Đóng gói toàn bộ cơ sở dữ liệu và tệp đính kèm thành tệp nén `.zip` tiêu chuẩn; hỗ trợ kiểm tra tính toàn vẹn (Validate) trước khi phục hồi.
+- **Đồng bộ Google Drive:**
+  - Kết nối bảo mật tài khoản cá nhân qua Google OAuth 2.0.
+  - Tự động tải bản sao lưu mới nhất lên Google Drive phòng ngừa trường hợp máy tính bị hỏng, lỗi ổ cứng hoặc đổi máy mới.
+  - Quản lý hạn mức lưu trữ tự động trên đám mây (giữ lại N bản gần nhất để tránh đầy bộ nhớ Drive).
+  - Khôi phục dữ liệu trực tiếp từ đám mây Google Drive về máy tính chỉ với 1 cú nhấp chuột.
+
+### 6. Bảo mật & Thùng rác an toàn
+- Hỗ trợ khóa bảo mật bằng mật khẩu khởi động và tự động khóa sau khoảng thời gian không thao tác.
+- Thùng rác (Recycle Bin) cho phép xem lại, khôi phục hoặc dọn dẹp vĩnh viễn các tài liệu đã xóa.
 
 ---
 
@@ -23,8 +62,8 @@
 ```
 src/GiaoAn.Domain          Entity, enum, TextNormalizer (bỏ dấu tiếng Việt), TagName
 src/GiaoAn.Application     Use cases/services, DTOs, validators, interfaces (IFileStorage, IAppDbContext…)
-src/GiaoAn.Infrastructure  EF Core + SQLite, cấu hình entity, lưu tệp GUID, sao lưu/phục hồi, bảo mật
-src/GiaoAn.Server          Minimal API, middleware bảo mật, ServerHost (khởi chạy server nền)
+src/GiaoAn.Infrastructure  EF Core + SQLite, cấu hình entity, lưu tệp GUID, sao lưu/phục hồi, Google Drive sync
+src/GiaoAn.Server          Minimal API, middleware bảo mật/CSRF, ServerHost (khởi chạy server nền)
 src/GiaoAn.Desktop         WPF + WebView2 (TeachStash.exe), nạp giao diện React nội bộ từ wwwroot
 web/                       Mã nguồn Frontend (React 18, TypeScript, Tailwind CSS, Vite)
 tests/                     xUnit: Domain, Application (SQLite in-memory), Server (HTTP integration tests)
@@ -173,3 +212,4 @@ Kết quả xuất ra tại:
 | “Máy chưa cài WebView2 Runtime” | Cài đặt WebView2 Evergreen Runtime từ trang chủ Microsoft |
 | Mở Desktop trắng tinh | Đảm bảo thư mục `web/dist/index.html` đã tồn tại trước khi biên dịch Desktop |
 | Lỗi migration cơ sở dữ liệu | Nếu schema thay đổi lúc dev, có thể tạm xóa `giaoan.db` thử nghiệm; ứng dụng sẽ tự khởi tạo lại cấu trúc mới nhất qua `EnsureCreated()` |
+| Lỗi đăng nhập Google Drive (redirect URI mismatch) | Đảm bảo server chạy đúng cổng cố định `5080` và đã thêm `http://127.0.0.1:5080/api/gdrive/callback` vào Authorized redirect URIs trên Google Cloud Console |
