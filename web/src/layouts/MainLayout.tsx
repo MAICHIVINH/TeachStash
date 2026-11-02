@@ -72,8 +72,9 @@ export default function MainLayout({ onLock }: { onLock: () => void }) {
             </div>
           ))}
         </nav>
-        <div className="border-t border-slate-100 px-2 py-3 text-center text-[11px] text-slate-400 dark:border-slate-800/80 dark:text-slate-500">
-          @2026 - Phát triển bởi Mai Chí Vĩnh
+        <div className="border-t border-slate-100 px-2 py-3 text-center text-[11px] leading-relaxed text-slate-400 dark:border-slate-800/80 dark:text-slate-500">
+          <div className="font-medium text-slate-500 dark:text-slate-400">Phiên bản 1.0.0</div>
+          <div>@2026 - Phát triển bởi Mai Chí Vĩnh</div>
         </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
