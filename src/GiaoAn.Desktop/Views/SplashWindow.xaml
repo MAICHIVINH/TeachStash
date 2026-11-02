@@ -1,0 +1,20 @@
+<Window x:Class="GiaoAn.Desktop.Views.SplashWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Width="460" Height="260" WindowStartupLocation="CenterScreen" WindowStyle="None"
+        ResizeMode="NoResize" AllowsTransparency="False" Background="#4F46E5" ShowInTaskbar="True"
+        Title="TeachStash" Icon="pack://application:,,,/TeachStash;component/app.ico">
+    <Grid Margin="32">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel VerticalAlignment="Center">
+            <TextBlock Text="TEACHSTASH" FontSize="26" FontWeight="Bold" Foreground="White" />
+            <TextBlock Text="Kho giáo án, bài tập và mã nguồn giảng dạy" Margin="0,6,0,0" FontSize="14" Foreground="#E0E7FF" />
+        </StackPanel>
+        <TextBlock Grid.Row="1" Text="{Binding Status}" Foreground="White" FontSize="13" Margin="0,0,0,8" />
+        <ProgressBar Grid.Row="2" IsIndeterminate="True" Height="4" Foreground="White" Background="#6366F1" BorderThickness="0" />
+    </Grid>
+</Window>

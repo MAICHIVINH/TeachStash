@@ -1,0 +1,27 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root { color-scheme: light; }
+html.dark { color-scheme: dark; }
+html, body, #root { height: 100%; }
+body { @apply bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200; font-family: "Segoe UI", system-ui, sans-serif; font-size: 14px; user-select: none; }
+input, textarea, select { user-select: text; }
+.selectable { user-select: text; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #94a3b8aa; border-radius: 6px; }
+.code-font { font-family: Consolas, "Cascadia Mono", "Courier New", monospace; font-size: 13px; line-height: 20px; tab-size: 4; }
+/* highlight.js — màu cho cả hai chế độ */
+.hljs-comment,.hljs-quote{color:#6b7280;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-literal,.hljs-built_in{color:#7c3aed}
+.hljs-string,.hljs-doctag,.hljs-regexp{color:#047857}
+.hljs-number,.hljs-attr,.hljs-attribute{color:#b45309}
+.hljs-title,.hljs-section,.hljs-function .hljs-title{color:#1d4ed8}
+.hljs-type,.hljs-class .hljs-title,.hljs-meta{color:#0e7490}
+.hljs-variable,.hljs-template-variable,.hljs-name,.hljs-tag{color:#be123c}
+html.dark .hljs-keyword,html.dark .hljs-selector-tag,html.dark .hljs-literal,html.dark .hljs-built_in{color:#c4b5fd}
+html.dark .hljs-string,html.dark .hljs-doctag,html.dark .hljs-regexp{color:#6ee7b7}
+html.dark .hljs-number,html.dark .hljs-attr,html.dark .hljs-attribute{color:#fcd34d}
+html.dark .hljs-title,html.dark .hljs-section{color:#93c5fd}
+html.dark .hljs-type,html.dark .hljs-meta{color:#67e8f9}
+html.dark .hljs-variable,html.dark .hljs-template-variable,html.dark .hljs-name,html.dark .hljs-tag{color:#fda4af}
+html.dark .hljs-comment,html.dark .hljs-quote{color:#9ca3af}
