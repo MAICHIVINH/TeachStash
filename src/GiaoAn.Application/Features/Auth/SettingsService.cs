@@ -12,6 +12,15 @@ public static class SettingKeys
     public const string AutoLockMinutes = "AutoLockMinutes";
     public const string ExtraExtensions = "ExtraExtensions";
     public const string PasswordHash = "PasswordHash";
+
+    public const string GoogleDriveClientId = "GoogleDrive_ClientId";
+    public const string GoogleDriveClientSecret = "GoogleDrive_ClientSecret";
+    public const string GoogleDriveRefreshToken = "GoogleDrive_RefreshToken";
+    public const string GoogleDriveUserEmail = "GoogleDrive_UserEmail";
+    public const string GoogleDriveUserName = "GoogleDrive_UserName";
+    public const string GoogleDriveAutoUpload = "GoogleDrive_AutoUpload";
+    public const string GoogleDriveMaxBackups = "GoogleDrive_MaxBackups";
+    public const string GoogleDriveRedirectUri = "GoogleDrive_RedirectUri";
 }
 
 public sealed class SettingsService(IAppDbContext db, IAppPaths paths, IFilePolicy policy) : ISettingsService

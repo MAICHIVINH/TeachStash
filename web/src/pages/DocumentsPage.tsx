@@ -106,10 +106,39 @@ export default function DocumentsPage() {
             )}
             {facets && <FacetGroup title="Ngôn ngữ" items={facets.languages} active={filters.language} onPick={k => setF({ language: k })} />}
             {facets && <FacetGroup title="Thẻ" items={facets.tags} active={filters.tag} onPick={k => setF({ tag: k })} />}
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Ngày tạo</div>
-            <div className="mt-1 space-y-1">
-              <input type="date" className={inputCls} value={filters.from} onChange={e => setF({ from: e.target.value })} title="Từ ngày" />
-              <input type="date" className={inputCls} value={filters.to} onChange={e => setF({ to: e.target.value })} title="Đến ngày" />
+            <div className="mb-4">
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Ngày tạo</span>
+                {(filters.from || filters.to) && (
+                  <button
+                    type="button"
+                    onClick={() => setF({ from: '', to: '' })}
+                    className="text-xs text-indigo-600 hover:underline dark:text-indigo-400"
+                  >
+                    Xóa ngày
+                  </button>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <div>
+                  <label className="mb-0.5 block text-xs text-slate-500 dark:text-slate-400">Từ ngày</label>
+                  <input
+                    type="date"
+                    className={inputCls}
+                    value={filters.from}
+                    onChange={e => setF({ from: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="mb-0.5 block text-xs text-slate-500 dark:text-slate-400">Đến ngày</label>
+                  <input
+                    type="date"
+                    className={inputCls}
+                    value={filters.to}
+                    onChange={e => setF({ to: e.target.value })}
+                  />
+                </div>
+              </div>
             </div>
             {topicsForGrade.length === 0 && <p className="mt-3 text-xs text-slate-400">Mẹo: thêm chủ đề/bài học trong Cài đặt để lọc theo chương trình.</p>}
           </aside>

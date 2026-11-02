@@ -23,6 +23,7 @@ public static class ApiEndpoints
         MapSnippets(api);
         MapMisc(api);
         MapBackups(api);
+        MapGoogleDrive(api);
     }
 
     // ---------- Auth ----------
@@ -198,6 +199,105 @@ public static class ApiEndpoints
                 ?? throw new NotFoundException("Không tìm thấy bản sao lưu.");
             if (!File.Exists(h.FilePath)) throw new NotFoundException("Tệp sao lưu không còn tồn tại.");
             return Results.File(h.FilePath, "application/zip", Path.GetFileName(h.FilePath));
+        });
+    }
+
+    // ---------- Google Drive ----------
+    private static void MapGoogleDrive(RouteGroupBuilder api)
+    {
+        var g = api.MapGroup("/gdrive");
+        g.MapGet("/status", async (IGoogleDriveService s, CancellationToken ct) => Results.Ok(await s.GetStatusAsync(ct)));
+        g.MapPost("/config", async (GoogleDriveConfigureRequest r, IGoogleDriveService s, CancellationToken ct) =>
+        {
+            await s.ConfigureCredentialsAsync(r, ct);
+            return Results.Ok(await s.GetStatusAsync(ct));
+        });
+        g.MapPost("/auth-url", async (HttpRequest req, IGoogleDriveService s, CancellationToken ct) =>
+        {
+            var port = req.Host.Port ?? 5080;
+            var callbackUrl = $"http://127.0.0.1:{port}/api/gdrive/callback";
+            return Results.Ok(await s.GetAuthUrlAsync(callbackUrl, ct));
+        });
+        g.MapPost("/open-browser", (OpenBrowserRequest r) =>
+        {
+            if (Uri.TryCreate(r.Url, UriKind.Absolute, out var uri) &&
+                (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(uri.AbsoluteUri) { UseShellExecute = true });
+                    return Results.Ok(new { success = true });
+                }
+                catch (Exception ex)
+                {
+                    return Results.BadRequest(new { error = ex.Message });
+                }
+            }
+            return Results.BadRequest(new { error = "Đường dẫn không hợp lệ." });
+        });
+        g.MapPost("/exchange", async (GoogleDriveExchangeCodeRequest r, IGoogleDriveService s, CancellationToken ct) =>
+            Results.Ok(await s.ExchangeCodeAsync(r, ct)));
+        g.MapPost("/disconnect", async (IGoogleDriveService s, CancellationToken ct) =>
+        {
+            await s.DisconnectAsync(ct);
+            return Results.Ok(await s.GetStatusAsync(ct));
+        });
+        g.MapPut("/settings", async (GoogleDriveSyncSettingsRequest r, IGoogleDriveService s, CancellationToken ct) =>
+        {
+            await s.UpdateSyncSettingsAsync(r, ct);
+            return Results.Ok(await s.GetStatusAsync(ct));
+        });
+        g.MapGet("/backups", async (IGoogleDriveService s, CancellationToken ct) => Results.Ok(await s.ListBackupsAsync(ct)));
+        g.MapPost("/upload/{backupId:int}", async (int backupId, IGoogleDriveService gdrive, IAppDbContext db, CancellationToken ct) =>
+        {
+            var h = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(
+                db.BackupHistories, x => x.Id == backupId && x.Success && x.Kind == GiaoAn.Domain.Enums.BackupKind.Backup, ct)
+                ?? throw new NotFoundException("Không tìm thấy bản sao lưu.");
+            if (!File.Exists(h.FilePath)) throw new NotFoundException("Tệp sao lưu không còn tồn tại trên máy.");
+            var driveFileId = await gdrive.UploadBackupAsync(h.FilePath, ct);
+            if (!h.Message.Contains("Đã đồng bộ lên Google Drive"))
+            {
+                h.Message += " (Đã đồng bộ lên Google Drive)";
+                await db.SaveChangesAsync(ct);
+            }
+            return Results.Ok(new { driveFileId, message = "Đã tải tệp lên Google Drive thành công." });
+        });
+        g.MapPost("/restore/{fileId}", async (string fileId, IGoogleDriveService gdrive, IBackupService backup, CancellationToken ct) =>
+        {
+            var downloadedPath = await gdrive.DownloadBackupAsync(fileId, ct);
+            var validation = await backup.ValidateAsync(downloadedPath, ct);
+            return Results.Ok(new { path = downloadedPath, result = validation });
+        });
+        g.MapPost("/restore-confirm/{fileId}", async (string fileId, HttpRequest req, IGoogleDriveService gdrive, IBackupService backup, CancellationToken ct) =>
+        {
+            var body = await req.ReadFromJsonAsync<RestoreRequest>(ct);
+            var downloadedPath = body?.Path;
+            if (string.IsNullOrWhiteSpace(downloadedPath) || !File.Exists(downloadedPath))
+            {
+                downloadedPath = await gdrive.DownloadBackupAsync(fileId, ct);
+            }
+            try
+            {
+                var res = await backup.RestoreAsync(downloadedPath, true, ct);
+                return Results.Ok(res);
+            }
+            finally
+            {
+                try { if (File.Exists(downloadedPath)) File.Delete(downloadedPath); } catch { /* ignore */ }
+            }
+        });
+        g.MapGet("/download/{fileId}", async (string fileId, IGoogleDriveService gdrive, CancellationToken ct) =>
+        {
+            var downloadedPath = await gdrive.DownloadBackupAsync(fileId, ct);
+            var fileName = Path.GetFileName(downloadedPath);
+            return Results.File(downloadedPath, "application/zip", fileName, enableRangeProcessing: true);
+        });
+        g.MapGet("/callback", (string? code, string? error) =>
+        {
+            var html = string.IsNullOrEmpty(error) && !string.IsNullOrEmpty(code)
+                ? $@"<!DOCTYPE html><html><head><meta charset='utf-8'><title>Đăng nhập Google thành công</title><style>body{{font-family:sans-serif;text-align:center;padding:50px;background:#f8fafc;color:#1e293b}}h2{{color:#16a34a}}code{{background:#e2e8f0;padding:4px 8px;border-radius:4px;font-size:16px;display:inline-block;margin:15px 0}}</style></head><body><h2>Đăng nhập Google thành công!</h2><p>Mã xác thực của bạn:</p><br><code>{code}</code><p>Ứng dụng sẽ tự động kết nối trong giây lát, hoặc bạn có thể sao chép mã trên dán vào TeachStash.</p><script>if(window.opener){{window.opener.postMessage({{type:'gdrive_auth',code:'{code}'}},'*');setTimeout(()=>window.close(),1500);}}</script></body></html>"
+                : $@"<!DOCTYPE html><html><head><meta charset='utf-8'><title>Lỗi xác thực</title><style>body{{font-family:sans-serif;text-align:center;padding:50px;background:#fff1f2;color:#9f1239}}</style></head><body><h2>Xác thực không thành công</h2><p>{error ?? "Không nhận được mã xác thực từ Google."}</p><script>if(window.opener){{window.opener.postMessage({{type:'gdrive_auth_error',error:'{error}'}},'*');}}</script></body></html>";
+            return Results.Content(html, "text/html; charset=utf-8");
         });
     }
 }

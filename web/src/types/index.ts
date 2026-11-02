@@ -51,3 +51,29 @@ export interface BackupInfo { id: number; kind: string; filePath: string; sizeBy
 export interface BackupValidation { valid: boolean; message: string; createdAt: string | null; documentCount: number; fileCount: number }
 export interface AuthStatus { passwordEnabled: boolean; isAuthenticated: boolean; autoLockMinutes: number }
 export interface Settings { theme: 'system' | 'light' | 'dark'; autoLockMinutes: number; extraExtensions: string; dataRoot: string; allowedExtensions: string[]; maxFileSizeMb: number }
+
+export interface GoogleDriveStatus {
+  isConfigured: boolean
+  isConnected: boolean
+  userEmail: string | null
+  userName: string | null
+  autoUpload: boolean
+  maxBackups: number
+}
+
+export interface GoogleDriveFile {
+  id: string
+  name: string
+  sizeBytes: number
+  createdAt: string
+}
+
+export interface GoogleDriveConfig {
+  clientId: string
+  clientSecret: string
+}
+
+export interface GoogleDriveSyncSettings {
+  autoUpload: boolean
+  maxBackups: number
+}

@@ -146,3 +146,16 @@ public interface IBackupService
     Task<BackupValidationDto> ValidateAsync(string zipPath, CancellationToken ct);
     Task<BackupInfoDto> RestoreAsync(string zipPath, bool confirm, CancellationToken ct);
 }
+
+public interface IGoogleDriveService
+{
+    Task<GoogleDriveStatusDto> GetStatusAsync(CancellationToken ct = default);
+    Task ConfigureCredentialsAsync(GoogleDriveConfigureRequest req, CancellationToken ct = default);
+    Task<GoogleDriveAuthUrlDto> GetAuthUrlAsync(string? callbackUrl = null, CancellationToken ct = default);
+    Task<GoogleDriveStatusDto> ExchangeCodeAsync(GoogleDriveExchangeCodeRequest req, CancellationToken ct = default);
+    Task DisconnectAsync(CancellationToken ct = default);
+    Task UpdateSyncSettingsAsync(GoogleDriveSyncSettingsRequest req, CancellationToken ct = default);
+    Task<string> UploadBackupAsync(string zipPath, CancellationToken ct = default);
+    Task<IReadOnlyList<GoogleDriveFileDto>> ListBackupsAsync(CancellationToken ct = default);
+    Task<string> DownloadBackupAsync(string fileId, CancellationToken ct = default);
+}

@@ -17,7 +17,12 @@ namespace GiaoAn.Infrastructure.Services;
 /// Sao lưu = một tệp ZIP gồm manifest.json + giaoan.db (ảnh chụp nhất quán bằng VACUUM INTO) + files/**.
 /// Phục hồi: kiểm tra → tạo bản sao lưu an toàn của dữ liệu hiện tại → giải nén ra temp → thay thế DB và files → hoàn tác nếu lỗi.
 /// </summary>
-public sealed class BackupService(AppDbContext db, IAppPaths paths, ISessionStore sessions, ILogger<BackupService> log) : IBackupService
+public sealed class BackupService(
+    AppDbContext db,
+    IAppPaths paths,
+    ISessionStore sessions,
+    ILogger<BackupService> log,
+    IGoogleDriveService? gdrive = null) : IBackupService
 {
     private static readonly SemaphoreSlim Gate = new(1, 1);
     public sealed record Manifest(string App, int Version, DateTime CreatedAt, int DocumentCount, int FileCount, string DbSha256);
@@ -65,7 +70,28 @@ public sealed class BackupService(AppDbContext db, IAppPaths paths, ISessionStor
             File.Move(tmpZip, finalPath);
             var size = new FileInfo(finalPath).Length;
             log.LogInformation("Đã sao lưu {Path} ({Size} bytes)", finalPath, size);
-            var h = new BackupHistory { Kind = BackupKind.Backup, FilePath = finalPath, SizeBytes = size, Success = true, Message = $"{docCount} tài liệu, {fileCount} tệp", CreatedAt = DateTime.UtcNow };
+
+            var message = $"{docCount} tài liệu, {fileCount} tệp";
+            if (gdrive != null && recordHistory)
+            {
+                try
+                {
+                    var status = await gdrive.GetStatusAsync(ct);
+                    if (status.IsConnected && status.AutoUpload)
+                    {
+                        var driveFileId = await gdrive.UploadBackupAsync(finalPath, ct);
+                        message += " (Đã đồng bộ lên Google Drive)";
+                        log.LogInformation("Đã tự động tải sao lưu lên Google Drive ID={DriveId}", driveFileId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    log.LogWarning(ex, "Lỗi tải tự động lên Google Drive");
+                    message += $" (Chưa đồng bộ Drive: {ex.Message})";
+                }
+            }
+
+            var h = new BackupHistory { Kind = BackupKind.Backup, FilePath = finalPath, SizeBytes = size, Success = true, Message = message, CreatedAt = DateTime.UtcNow };
             if (recordHistory) { db.BackupHistories.Add(h); await db.SaveChangesAsync(ct); }
             return ToDto(h);
         }

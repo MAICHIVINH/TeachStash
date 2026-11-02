@@ -16,14 +16,27 @@ public sealed class ServerLauncher : IAsyncDisposable
     public async Task StartAsync(string dataRoot, CancellationToken ct)
     {
         var dev = IsDev;
-        _server = await ServerHost.StartAsync(new ServerOptions
+        var preferredPort = int.TryParse(Environment.GetEnvironmentVariable("GIAOAN_PORT"), out var p) ? p : 5080;
+        try
         {
-            DataRoot = dataRoot,
-            // Khi phát triển dùng cổng cố định để Vite proxy trỏ đúng; còn lại luôn là cổng ngẫu nhiên.
-            Port = dev && int.TryParse(Environment.GetEnvironmentVariable("GIAOAN_PORT"), out var p) ? p : (dev ? 5080 : 0),
-            WebRootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot"),
-            AllowedOrigins = dev ? new[] { DevUiUrl, "http://127.0.0.1:5174" } : Array.Empty<string>()
-        }, ct);
+            _server = await ServerHost.StartAsync(new ServerOptions
+            {
+                DataRoot = dataRoot,
+                Port = preferredPort,
+                WebRootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot"),
+                AllowedOrigins = dev ? new[] { DevUiUrl, "http://127.0.0.1:5174" } : Array.Empty<string>()
+            }, ct);
+        }
+        catch
+        {
+            _server = await ServerHost.StartAsync(new ServerOptions
+            {
+                DataRoot = dataRoot,
+                Port = 0,
+                WebRootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot"),
+                AllowedOrigins = dev ? new[] { DevUiUrl, "http://127.0.0.1:5174" } : Array.Empty<string>()
+            }, ct);
+        }
         await WaitUntilReadyAsync(ct);
     }
 

@@ -108,22 +108,22 @@ function Categories() {
     topics: typeof topics
     lessonsCount: number
   }> = [
-    ...gradeLevels.map(g => {
-      const gTopics = topics.filter(t => t.gradeLevelId === g.id)
-      const gLessonsCount = gTopics.reduce(
-        (sum, t) => sum + lessons.filter(l => l.topicId === t.id).length,
-        0
-      )
-      return {
-        id: g.id,
-        name: g.name,
-        gradeId: g.id,
-        topics: gTopics,
-        lessonsCount: gLessonsCount,
-      }
-    }),
-    ...(hasCommonTopics
-      ? [
+      ...gradeLevels.map(g => {
+        const gTopics = topics.filter(t => t.gradeLevelId === g.id)
+        const gLessonsCount = gTopics.reduce(
+          (sum, t) => sum + lessons.filter(l => l.topicId === t.id).length,
+          0
+        )
+        return {
+          id: g.id,
+          name: g.name,
+          gradeId: g.id,
+          topics: gTopics,
+          lessonsCount: gLessonsCount,
+        }
+      }),
+      ...(hasCommonTopics
+        ? [
           {
             id: 'common' as const,
             name: 'Dùng chung / Mọi khối lớp',
@@ -134,8 +134,8 @@ function Categories() {
               .reduce((sum, t) => sum + lessons.filter(l => l.topicId === t.id).length, 0),
           },
         ]
-      : []),
-  ]
+        : []),
+    ]
 
   const activeGradeIdForNewTopic = typeof expandedGradeId === 'number' ? expandedGradeId : null
 
@@ -616,11 +616,10 @@ function Security({ s, reload }: { s: Settings; reload: () => void }) {
                       key={m}
                       type="button"
                       onClick={() => setMins(m)}
-                      className={`rounded px-2 py-0.5 text-xs transition ${
-                        mins === m
+                      className={`rounded px-2 py-0.5 text-xs transition ${mins === m
                           ? 'bg-indigo-600 text-white font-medium'
                           : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
-                      }`}
+                        }`}
                     >
                       {m === 0 ? 'Không khóa' : `${m}p`}
                     </button>
@@ -757,11 +756,10 @@ export default function SettingsPage() {
                   key={item.id}
                   type="button"
                   onClick={() => changeTheme(item.id as ThemeMode)}
-                  className={`flex flex-col items-center justify-center gap-2 rounded-xl border p-3.5 text-center transition ${
-                    active
+                  className={`flex flex-col items-center justify-center gap-2 rounded-xl border p-3.5 text-center transition ${active
                       ? 'border-indigo-600 bg-indigo-50/70 text-indigo-700 shadow-sm dark:border-indigo-500 dark:bg-indigo-950/70 dark:text-indigo-300'
                       : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-800/40 dark:text-slate-300 dark:hover:bg-slate-800'
-                  }`}
+                    }`}
                 >
                   <Icon className={`h-5 w-5 ${active ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`} />
                   <span className="text-xs font-medium">{item.label}</span>

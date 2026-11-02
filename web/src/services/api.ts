@@ -98,4 +98,19 @@ export const api = {
   restoreBackup: (path: string) => request<T.BackupInfo>('POST', '/api/backups/restore', { path, confirm: true }),
   restoreUpload: (file: File) => { const f = new FormData(); f.append('file', file); f.append('confirm', 'true'); return request<T.BackupInfo>('POST', '/api/backups/restore-upload', f) },
   backupDownloadUrl: (id: number) => `/api/backups/${id}/download`,
+
+  gdrive: {
+    status: () => request<T.GoogleDriveStatus>('GET', '/api/gdrive/status'),
+    config: (body: T.GoogleDriveConfig) => request<T.GoogleDriveStatus>('POST', '/api/gdrive/config', body),
+    authUrl: () => request<{ authUrl: string; state: string }>('POST', '/api/gdrive/auth-url'),
+    exchange: (code: string, state?: string) => request<T.GoogleDriveStatus>('POST', '/api/gdrive/exchange', { code, state }),
+    disconnect: () => request<T.GoogleDriveStatus>('POST', '/api/gdrive/disconnect'),
+    updateSettings: (body: T.GoogleDriveSyncSettings) => request<T.GoogleDriveStatus>('PUT', '/api/gdrive/settings', body),
+    backups: () => request<T.GoogleDriveFile[]>('GET', '/api/gdrive/backups'),
+    upload: (backupId: number) => request<{ driveFileId: string; message: string }>('POST', `/api/gdrive/upload/${backupId}`),
+    restore: (fileId: string) => request<{ path: string; result: T.BackupValidation }>('POST', `/api/gdrive/restore/${fileId}`),
+    restoreConfirm: (fileId: string, path: string) => request<T.BackupInfo>('POST', `/api/gdrive/restore-confirm/${fileId}`, { path, confirm: true }),
+    downloadUrl: (fileId: string) => `/api/gdrive/download/${fileId}`,
+    openBrowser: (url: string) => request<{ success: boolean }>('POST', '/api/gdrive/open-browser', { url }),
+  },
 }

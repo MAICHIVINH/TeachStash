@@ -66,6 +66,12 @@ public sealed class CsrfMiddleware(RequestDelegate next, ServerOptions options)
     public async Task InvokeAsync(HttpContext ctx)
     {
         var r = ctx.Request;
+        if (r.Path.StartsWithSegments("/api/gdrive/callback"))
+        {
+            await next(ctx);
+            return;
+        }
+
         if (r.Headers.TryGetValue("Sec-Fetch-Site", out var site) && site == "cross-site") { await Deny(ctx); return; }
 
         var safe = HttpMethods.IsGet(r.Method) || HttpMethods.IsHead(r.Method) || HttpMethods.IsOptions(r.Method);

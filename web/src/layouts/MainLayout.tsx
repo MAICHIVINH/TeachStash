@@ -8,23 +8,29 @@ import { cx } from '../components/ui'
 interface NavItem { to: string; label: string; icon: LucideIcon; exact?: boolean; type?: string }
 const groups: { title: string; items: NavItem[] }[] = [
   { title: 'TỔNG QUAN', items: [{ to: '/', label: 'Dashboard', icon: LayoutDashboard, exact: true }] },
-  { title: 'QUẢN LÝ TÀI LIỆU', items: [
-    { to: '/documents', label: 'Tất cả tài liệu', icon: FolderOpen, exact: true },
-    { to: '/documents?type=1', label: 'Giáo án', icon: FileText, type: '1' },
-    { to: '/documents?type=2', label: 'Bài giảng', icon: Presentation, type: '2' },
-    { to: '/documents?type=7', label: 'Phiếu học tập', icon: ClipboardCheck, type: '7' },
-    { to: '/documents?type=6', label: 'Tài liệu tham khảo', icon: BookOpen, type: '6' },
-  ] },
-  { title: 'NGÂN HÀNG HỌC LIỆU', items: [
-    { to: '/exercises', label: 'Bài tập', icon: ListChecks },
-    { to: '/snippets', label: 'Ngân hàng mã nguồn', icon: Code2 },
-    { to: '/documents?type=4', label: 'Đề kiểm tra', icon: Library, type: '4' },
-  ] },
-  { title: 'HỆ THỐNG', items: [
-    { to: '/trash', label: 'Thùng rác', icon: Trash2 },
-    { to: '/backup', label: 'Sao lưu & phục hồi', icon: DatabaseBackup },
-    { to: '/settings', label: 'Cài đặt', icon: Settings },
-  ] },
+  {
+    title: 'QUẢN LÝ TÀI LIỆU', items: [
+      { to: '/documents', label: 'Tất cả tài liệu', icon: FolderOpen, exact: true },
+      { to: '/documents?type=1', label: 'Giáo án', icon: FileText, type: '1' },
+      { to: '/documents?type=2', label: 'Bài giảng', icon: Presentation, type: '2' },
+      { to: '/documents?type=7', label: 'Phiếu học tập', icon: ClipboardCheck, type: '7' },
+      { to: '/documents?type=6', label: 'Tài liệu tham khảo', icon: BookOpen, type: '6' },
+    ]
+  },
+  {
+    title: 'NGÂN HÀNG HỌC LIỆU', items: [
+      { to: '/exercises', label: 'Bài tập', icon: ListChecks },
+      { to: '/snippets', label: 'Ngân hàng mã nguồn', icon: Code2 },
+      { to: '/documents?type=4', label: 'Đề kiểm tra', icon: Library, type: '4' },
+    ]
+  },
+  {
+    title: 'HỆ THỐNG', items: [
+      { to: '/trash', label: 'Thùng rác', icon: Trash2 },
+      { to: '/backup', label: 'Sao lưu & phục hồi', icon: DatabaseBackup },
+      { to: '/settings', label: 'Cài đặt', icon: Settings },
+    ]
+  },
 ]
 
 export default function MainLayout({ onLock }: { onLock: () => void }) {
@@ -40,7 +46,7 @@ export default function MainLayout({ onLock }: { onLock: () => void }) {
     const dark = document.documentElement.classList.contains('dark')
     const next = dark ? 'light' : 'dark'
     setTheme(next)
-    api.updateSettings({ theme: next }).catch(() => {})
+    api.updateSettings({ theme: next }).catch(() => { })
   }
 
   return (

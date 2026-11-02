@@ -20,6 +20,7 @@ public static class DependencyInjection
         s.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
         s.AddSingleton<ISessionStore, InMemorySessionStore>();
         s.AddScoped<IBackupService, BackupService>();
+        s.AddScoped<IGoogleDriveService, GoogleDriveService>();
         s.AddSingleton<ILoggerProvider>(new FileLoggerProvider(paths.LogsRoot));
         return s;
     }

@@ -160,7 +160,7 @@ export default function App() {
   useEffect(() => {
     const mins = auth?.autoLockMinutes ?? 0
     if (!auth?.passwordEnabled || mins <= 0 || locked) return
-    const reset = () => { window.clearTimeout(timer.current); timer.current = window.setTimeout(async () => { await api.logout().catch(() => {}); setLocked(true) }, mins * 60_000) }
+    const reset = () => { window.clearTimeout(timer.current); timer.current = window.setTimeout(async () => { await api.logout().catch(() => { }); setLocked(true) }, mins * 60_000) }
     const evs = ['mousemove', 'keydown', 'mousedown', 'wheel']
     evs.forEach(e => window.addEventListener(e, reset)); reset()
     return () => { evs.forEach(e => window.removeEventListener(e, reset)); window.clearTimeout(timer.current) }
@@ -174,7 +174,7 @@ export default function App() {
   return (
     <>
       <Routes>
-        <Route element={<MainLayout onLock={async () => { await api.logout().catch(() => {}); setLocked(true) }} />}>
+        <Route element={<MainLayout onLock={async () => { await api.logout().catch(() => { }); setLocked(true) }} />}>
           <Route index element={<DashboardPage />} />
           <Route path="documents" element={<DocumentsPage />} />
           <Route path="exercises" element={<ExercisesPage />} />

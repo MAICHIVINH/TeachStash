@@ -33,7 +33,19 @@ public sealed class WebViewBridge(Window owner, WebView2 web)
         core.Settings.IsGeneralAutofillEnabled = false;
         core.Settings.IsPasswordAutosaveEnabled = false;
 
-        core.NewWindowRequested += (_, e) => e.Handled = true;
+        core.NewWindowRequested += (_, e) =>
+        {
+            e.Handled = true;
+            if (Uri.TryCreate(e.Uri, UriKind.Absolute, out var targetUri) &&
+                (targetUri.Scheme == Uri.UriSchemeHttp || targetUri.Scheme == Uri.UriSchemeHttps))
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(targetUri.AbsoluteUri) { UseShellExecute = true });
+                }
+                catch { /* ignore */ }
+            }
+        };
         core.NavigationStarting += (_, e) =>
         {
             if (!Uri.TryCreate(e.Uri, UriKind.Absolute, out var u) || !IsAllowed(u)) e.Cancel = true;
