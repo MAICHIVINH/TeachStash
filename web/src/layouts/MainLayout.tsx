@@ -1,9 +1,29 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { BookOpen, ClipboardCheck, Code2, FileText, FolderOpen, GraduationCap, LayoutDashboard, ListChecks, Lock, Moon, Search, Settings, Sun, Trash2, DatabaseBackup, Presentation, Library, type LucideIcon } from 'lucide-react'
+import { BookOpen, ClipboardCheck, Code2, DatabaseBackup, FileText, FolderOpen, GraduationCap, History, LayoutDashboard, Library, ListChecks, Lock, Moon, Presentation, Search, Settings, Sun, Trash2, X, type LucideIcon } from 'lucide-react'
 import { useApp } from '../stores/appStore'
 import { api } from '../services/api'
 import { cx } from '../components/ui'
+
+const SEARCH_HISTORY_KEY = 'teachstash_search_history'
+const MAX_HISTORY = 8
+
+function getStoredHistory(): string[] {
+  try {
+    const raw = localStorage.getItem(SEARCH_HISTORY_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed.filter(x => typeof x === 'string' && x.trim()) : []
+  } catch {
+    return []
+  }
+}
+
+function saveStoredHistory(history: string[]) {
+  try {
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history))
+  } catch { /* ignore */ }
+}
 
 interface NavItem { to: string; label: string; icon: LucideIcon; exact?: boolean; type?: string }
 const groups: { title: string; items: NavItem[] }[] = [
@@ -39,8 +59,53 @@ export default function MainLayout({ onLock }: { onLock: () => void }) {
   const loc = useLocation()
   const [params] = useSearchParams()
   const [q, setQ] = useState('')
+  const [history, setHistory] = useState<string[]>(getStoredHistory)
+  const [showHistory, setShowHistory] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null)
+
   useEffect(() => { if (!loc.pathname.startsWith('/search')) setQ('') }, [loc.pathname])
   const curType = loc.pathname === '/documents' ? params.get('type') : null
+
+  const addSearch = (term: string) => {
+    const clean = term.trim()
+    if (!clean) return
+    const next = [clean, ...history.filter(h => h.toLowerCase() !== clean.toLowerCase())].slice(0, MAX_HISTORY)
+    setHistory(next)
+    saveStoredHistory(next)
+    setShowHistory(false)
+    nav(`/search?q=${encodeURIComponent(clean)}`)
+  }
+
+  const removeHistoryItem = (e: React.MouseEvent, item: string) => {
+    e.stopPropagation()
+    const next = history.filter(h => h !== item)
+    setHistory(next)
+    saveStoredHistory(next)
+  }
+
+  const clearAllHistory = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setHistory([])
+    saveStoredHistory([])
+    setShowHistory(false)
+  }
+
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (formRef.current && !formRef.current.contains(e.target as Node)) {
+        setShowHistory(false)
+      }
+    }
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowHistory(false)
+    }
+    document.addEventListener('mousedown', handleOutside)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handleOutside)
+      document.removeEventListener('keydown', handleKey)
+    }
+  }, [])
 
   const toggleTheme = async () => {
     const dark = document.documentElement.classList.contains('dark')
@@ -85,10 +150,77 @@ export default function MainLayout({ onLock }: { onLock: () => void }) {
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center gap-3 border-b border-slate-200 bg-white px-5 py-2.5 dark:border-slate-800 dark:bg-slate-900">
-          <form className="relative max-w-xl flex-1" onSubmit={e => { e.preventDefault(); if (q.trim()) nav(`/search?q=${encodeURIComponent(q.trim())}`) }}>
+          <form
+            ref={formRef}
+            className="relative max-w-xl flex-1"
+            onSubmit={e => {
+              e.preventDefault()
+              if (q.trim()) addSearch(q)
+            }}
+          >
             <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-            <input value={q} onChange={e => setQ(e.target.value)} placeholder="Tìm nhanh tài liệu, bài tập, mã nguồn... (có dấu hoặc không dấu)"
-              className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm text-slate-800 outline-none focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-800" />
+            <input
+              value={q}
+              onChange={e => setQ(e.target.value)}
+              onFocus={() => {
+                if (history.length > 0) setShowHistory(true)
+              }}
+              placeholder="Tìm nhanh tài liệu, bài tập, mã nguồn... (có dấu hoặc không dấu)"
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-8 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
+            />
+            {q && (
+              <button
+                type="button"
+                onClick={() => setQ('')}
+                className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+                title="Xóa chữ"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+
+            {showHistory && history.length > 0 && (
+              <div className="absolute top-full left-0 right-0 z-50 mt-1.5 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-800 dark:bg-slate-900">
+                <div className="mb-1 flex items-center justify-between px-2.5 py-1 text-xs">
+                  <span className="font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    Lịch sử tìm kiếm
+                  </span>
+                  <button
+                    type="button"
+                    onClick={clearAllHistory}
+                    className="text-xs font-medium text-rose-500 hover:text-rose-600 hover:underline"
+                  >
+                    Xóa tất cả
+                  </button>
+                </div>
+                <div className="space-y-0.5">
+                  {history.map(item => (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => {
+                        setQ(item)
+                        addSearch(item)
+                      }}
+                      className="group flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 transition select-none"
+                    >
+                      <div className="flex items-center gap-2.5 truncate flex-1 min-w-0 pr-2">
+                        <History className="h-3.5 w-3.5 shrink-0 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+                        <span className="truncate">{item}</span>
+                      </div>
+                      <span
+                        role="button"
+                        onClick={e => removeHistoryItem(e, item)}
+                        className="rounded p-1 text-slate-400 hover:bg-slate-200 hover:text-rose-600 dark:hover:bg-slate-700 transition"
+                        title="Xóa từ khóa này"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </form>
           <div className="ml-auto flex items-center gap-1">
             <button onClick={toggleTheme} title="Đổi giao diện sáng/tối" className="rounded-md p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
