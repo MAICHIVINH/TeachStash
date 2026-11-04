@@ -29,7 +29,7 @@ public sealed class WebViewBridge(Window owner, WebView2 web)
         core.Settings.AreDefaultContextMenusEnabled = dev;
         core.Settings.IsStatusBarEnabled = false;
         core.Settings.IsZoomControlEnabled = true;
-        core.Settings.AreBrowserAcceleratorKeysEnabled = dev;
+        core.Settings.AreBrowserAcceleratorKeysEnabled = true;
         core.Settings.IsGeneralAutofillEnabled = false;
         core.Settings.IsPasswordAutosaveEnabled = false;
 

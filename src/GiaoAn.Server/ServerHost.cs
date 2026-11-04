@@ -79,14 +79,39 @@ public static class ServerHost
         if (webRoot != null)
         {
             var fp = new PhysicalFileProvider(webRoot);
+            var staticOptions = new StaticFileOptions
+            {
+                FileProvider = fp,
+                OnPrepareResponse = ctx =>
+                {
+                    if (ctx.File.Name.Equals("index.html", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ctx.Context.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
+                        ctx.Context.Response.Headers.Pragma = "no-cache";
+                        ctx.Context.Response.Headers.Expires = "0";
+                    }
+                }
+            };
             app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = fp });
-            app.UseStaticFiles(new StaticFileOptions { FileProvider = fp });
+            app.UseStaticFiles(staticOptions);
         }
         app.UseMiddleware<SessionAuthMiddleware>();
 
         app.MapApi();
         app.Map("/api/{**rest}", () => Results.Json(new { message = "Không tìm thấy API." }, statusCode: 404));
-        if (webRoot != null) app.MapFallbackToFile("index.html", new StaticFileOptions { FileProvider = new PhysicalFileProvider(webRoot) });
+        if (webRoot != null)
+        {
+            app.MapFallbackToFile("index.html", new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(webRoot),
+                OnPrepareResponse = ctx =>
+                {
+                    ctx.Context.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
+                    ctx.Context.Response.Headers.Pragma = "no-cache";
+                    ctx.Context.Response.Headers.Expires = "0";
+                }
+            });
+        }
         return app;
     }
 }

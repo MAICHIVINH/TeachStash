@@ -8,3 +8,5 @@ publish/
 design-time.db
 docs/
 keyggdrive.json
+.archify/
+!/.agents/skills/**/bin/
