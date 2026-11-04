@@ -1,9 +1,138 @@
 import { useEffect, useRef, useState, type ReactNode, type ButtonHTMLAttributes } from 'react'
-import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, Info, Loader2, X, XCircle } from 'lucide-react'
+import { AlertTriangle, Check, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, Info, Loader2, X, XCircle } from 'lucide-react'
 import { useApp } from '../stores/appStore'
 import { splitTags, uniqueTags } from '../utils/format'
 
 export const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ')
+
+export interface SelectOption {
+  value: string | number
+  label: string
+  sublabel?: string
+}
+
+export function CustomSelect({
+  value,
+  onChange,
+  options,
+  placeholder = 'Chọn...',
+  className,
+  menuClassName,
+  align = 'auto',
+}: {
+  value: string | number | null | undefined
+  onChange: (val: string) => void
+  options: (SelectOption | string)[]
+  placeholder?: string
+  className?: string
+  menuClassName?: string
+  align?: 'left' | 'right' | 'auto'
+}) {
+  const [open, setOpen] = useState(false)
+  const [menuAlign, setMenuAlign] = useState<'left' | 'right'>('left')
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (open && ref.current) {
+      if (align === 'left' || align === 'right') {
+        setMenuAlign(align)
+      } else {
+        const rect = ref.current.getBoundingClientRect()
+        // Nếu khoảng trống bên phải nút ít hơn 380px hoặc nút nằm ở nửa phải màn hình -> căn phải để menu mở sang trái
+        const spaceRight = window.innerWidth - rect.left
+        if (spaceRight < 380 || rect.right > window.innerWidth * 0.5) {
+          setMenuAlign('right')
+        } else {
+          setMenuAlign('left')
+        }
+      }
+    }
+  }, [open, align])
+
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    if (open) {
+      document.addEventListener('mousedown', handleOutside)
+      document.addEventListener('keydown', handleKey)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleOutside)
+      document.removeEventListener('keydown', handleKey)
+    }
+  }, [open])
+
+  const normalizedOptions: SelectOption[] = options.map(o =>
+    typeof o === 'string' ? { value: o, label: o } : o
+  )
+
+  const selectedOption = normalizedOptions.find(o => String(o.value) === String(value))
+  const displayLabel = selectedOption ? selectedOption.label : placeholder
+
+  return (
+    <div ref={ref} className={cx('relative inline-block text-left', className)}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        title={selectedOption ? selectedOption.label : undefined}
+        className={cx(
+          inputCls,
+          'flex items-center justify-between gap-2 text-left cursor-pointer pr-2.5 transition select-none truncate',
+          !selectedOption || selectedOption.value === '' ? 'text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-100',
+          open && 'ring-2 ring-indigo-500/30 border-indigo-500'
+        )}
+      >
+        <span className="truncate flex-1">{displayLabel}</span>
+        <ChevronDown className={cx('h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200', open && 'rotate-180 text-indigo-500')} />
+      </button>
+
+      {open && (
+        <div
+          className={cx(
+            'absolute top-full z-50 mt-1.5 min-w-full w-max max-w-sm sm:max-w-md max-h-72 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-800 dark:bg-slate-900',
+            menuAlign === 'right' ? 'right-0' : 'left-0',
+            menuClassName
+          )}
+        >
+          {normalizedOptions.map(opt => {
+            const isSelected = String(opt.value) === String(value)
+            return (
+              <button
+                key={String(opt.value)}
+                type="button"
+                onClick={() => {
+                  onChange(String(opt.value))
+                  setOpen(false)
+                }}
+                className={cx(
+                  'flex w-full items-center justify-between gap-2.5 rounded-lg px-3 py-2 text-left text-xs sm:text-sm transition select-none',
+                  isSelected
+                    ? 'bg-indigo-50/80 font-medium text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300'
+                    : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+                )}
+                title={opt.label}
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium whitespace-normal leading-snug break-words">{opt.label}</div>
+                  {opt.sublabel && (
+                    <div className="text-[11px] text-slate-400 whitespace-normal leading-snug break-words">{opt.sublabel}</div>
+                  )}
+                </div>
+                {isSelected && <Check className="h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-400" />}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
 
 type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'danger' | 'ghost'; size?: 'sm' | 'md'; loading?: boolean }
 export function Button({ variant = 'secondary', size = 'md', loading, className, children, disabled, ...rest }: BtnProps) {

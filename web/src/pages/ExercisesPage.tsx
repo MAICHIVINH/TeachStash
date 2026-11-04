@@ -22,7 +22,7 @@ import {
 } from 'lucide-react'
 import { api } from '../services/api'
 import { errText, useApp } from '../stores/appStore'
-import { Badge, Button, EmptyState, ErrorState, Pagination, Spinner, TagChips, cx, inputCls, useDebounced } from '../components/ui'
+import { Badge, Button, CustomSelect, EmptyState, ErrorState, Pagination, Spinner, TagChips, cx, inputCls, useDebounced } from '../components/ui'
 import { copyText } from '../components/CodeBlock'
 import { ExerciseDetail, ExerciseForm } from '../features/exercises/ExerciseParts'
 import type { Exercise } from '../types'
@@ -289,55 +289,51 @@ export default function ExercisesPage() {
 
           {/* Khối lớp */}
           <div className="md:col-span-2">
-            <select
-              className={inputCls}
+            <CustomSelect
+              className="w-full"
               value={grade}
-              onChange={e => {
-                setGrade(e.target.value)
+              placeholder="Tất cả khối"
+              onChange={val => {
+                setGrade(val)
                 setTopic('')
               }}
-            >
-              <option value="">Tất cả khối</option>
-              {lookups?.gradeLevels.map(g => (
-                <option key={g.id} value={g.id}>
-                  {g.name}
-                </option>
-              ))}
-            </select>
+              options={[
+                { value: '', label: 'Tất cả khối' },
+                ...(lookups?.gradeLevels.map(g => ({ value: g.id, label: g.name })) ?? [])
+              ]}
+            />
           </div>
 
           {/* Chủ đề */}
           <div className="md:col-span-3">
-            <select
-              className={inputCls}
+            <CustomSelect
+              className="w-full"
+              menuClassName="w-[360px] sm:w-[440px] max-w-[90vw]"
+              align="right"
               value={topic}
-              onChange={e => setTopic(e.target.value)}
-            >
-              <option value="">Tất cả chủ đề</option>
-              {lookups?.topics
-                .filter(t => !grade || !t.gradeLevelId || t.gradeLevelId === Number(grade))
-                .map(t => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-            </select>
+              placeholder="Tất cả chủ đề"
+              onChange={val => setTopic(val)}
+              options={[
+                { value: '', label: 'Tất cả chủ đề' },
+                ...(lookups?.topics
+                  .filter(t => !grade || !t.gradeLevelId || t.gradeLevelId === Number(grade))
+                  .map(t => ({ value: t.id, label: t.name })) ?? [])
+              ]}
+            />
           </div>
 
           {/* Ngôn ngữ lập trình */}
           <div className="md:col-span-2">
-            <select
-              className={inputCls}
+            <CustomSelect
+              className="w-full"
               value={lang}
-              onChange={e => setLang(e.target.value)}
-            >
-              <option value="">Mọi ngôn ngữ</option>
-              {lookups?.languages.map(l => (
-                <option key={l} value={l}>
-                  {l}
-                </option>
-              ))}
-            </select>
+              placeholder="Mọi ngôn ngữ"
+              onChange={val => setLang(val)}
+              options={[
+                { value: '', label: 'Mọi ngôn ngữ' },
+                ...(lookups?.languages.map(l => ({ value: l, label: l })) ?? [])
+              ]}
+            />
           </div>
 
           {/* Nút reset hoặc Tag badge */}

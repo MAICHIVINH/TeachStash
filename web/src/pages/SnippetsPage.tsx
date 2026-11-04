@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Check, Copy, Pencil, Plus, Search } from 'lucide-react'
+import { Check, Copy, Pencil, Plus, RotateCcw, Search, X } from 'lucide-react'
 import { api } from '../services/api'
 import { errText, useApp } from '../stores/appStore'
-import { Badge, Button, EmptyState, ErrorState, Pagination, Spinner, TagChips, inputCls, useDebounced } from '../components/ui'
+import { Badge, Button, CustomSelect, EmptyState, ErrorState, Pagination, Spinner, TagChips, cx, inputCls, useDebounced } from '../components/ui'
 import { copyText } from '../components/CodeBlock'
 import { SnippetDetail, SnippetForm } from '../features/snippets/SnippetParts'
 import type { Snippet } from '../types'
@@ -104,59 +104,273 @@ function SnippetCard({
 export default function SnippetsPage() {
   const { lookups, confirm, toast } = useApp()
   const [params, setParams] = useSearchParams()
-  const [q, setQ] = useState(''); const dq = useDebounced(q)
-  const [lang, setLang] = useState(''); const [grade, setGrade] = useState(''); const [topic, setTopic] = useState(''); const [tag, setTag] = useState('')
+  const [q, setQ] = useState('')
+  const dq = useDebounced(q)
+  const [lang, setLang] = useState('')
+  const [grade, setGrade] = useState('')
+  const [topic, setTopic] = useState('')
+  const [tag, setTag] = useState('')
   const [page, setPage] = useState(1)
   const [data, setData] = useState<{ items: Snippet[]; total: number } | null>(null)
   const [err, setErr] = useState('')
   const [form, setForm] = useState<{ sn: Snippet | null } | null>(params.get('new') ? { sn: null } : null)
   const [view, setView] = useState<Snippet | null>(null)
-  useEffect(() => { if (params.get('new')) setParams({}, { replace: true }) }, [params, setParams])
-  useEffect(() => setPage(1), [dq, lang, grade, topic, tag])
+
+  useEffect(() => {
+    if (params.get('new')) setParams({}, { replace: true })
+  }, [params, setParams])
+
+  useEffect(() => {
+    setPage(1)
+  }, [dq, lang, grade, topic, tag])
+
   const load = useCallback(() => {
     setErr('')
-    api.snippets({ q: dq, language: lang, gradeLevelId: grade, topicId: topic, tag, page, pageSize: 20 }).then(r => setData({ items: r.items, total: r.total })).catch(e => setErr(errText(e)))
+    api.snippets({ q: dq, language: lang, gradeLevelId: grade, topicId: topic, tag, page, pageSize: 20 })
+      .then(r => setData({ items: r.items, total: r.total }))
+      .catch(e => setErr(errText(e)))
   }, [dq, lang, grade, topic, tag, page])
+
   useEffect(load, [load])
-  const filtered = !!(dq || lang || grade || topic || tag)
+
+  const filtered = Boolean(dq || lang || grade || topic || tag)
+
   const del = async (s: Snippet) => {
     if (!(await confirm(`Xóa đoạn mã "${s.title}"? Hành động này không thể hoàn tác.`, { confirmText: 'Xóa', danger: true }))) return
-    try { await api.deleteSnippet(s.id); toast('success', 'Đã xóa đoạn mã.'); setView(null); load() } catch (x) { toast('error', errText(x)) }
+    try {
+      await api.deleteSnippet(s.id)
+      toast('success', 'Đã xóa đoạn mã.')
+      setView(null)
+      load()
+    } catch (x) {
+      toast('error', errText(x))
+    }
   }
+
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <h1 className="mr-2 text-xl font-bold">Ngân hàng mã nguồn</h1>
-        <div className="relative w-64"><Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" /><input className={inputCls + ' pl-9'} placeholder="Tìm mã nguồn..." value={q} onChange={e => setQ(e.target.value)} /></div>
-        <select className={inputCls + ' !w-auto'} value={lang} onChange={e => setLang(e.target.value)}><option value="">Mọi ngôn ngữ</option>{lookups!.languages.map(l => <option key={l}>{l}</option>)}</select>
-        <select className={inputCls + ' !w-auto'} value={grade} onChange={e => { setGrade(e.target.value); setTopic('') }}><option value="">Mọi khối</option>{lookups!.gradeLevels.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}</select>
-        <select className={inputCls + ' !w-auto'} value={topic} onChange={e => setTopic(e.target.value)}><option value="">Mọi chủ đề</option>{lookups!.topics.filter(t => !grade || !t.gradeLevelId || t.gradeLevelId === Number(grade)).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select>
-        {tag && <Button size="sm" onClick={() => setTag('')}>#{tag} ✕</Button>}
-        <Button variant="primary" className="ml-auto" onClick={() => setForm({ sn: null })}><Plus className="h-4 w-4" />Thêm đoạn mã</Button>
-      </div>
-      {err ? <ErrorState message={err} onRetry={load} /> : !data ? <Spinner /> : data.total === 0 ? (
-        filtered ? <EmptyState title="Không tìm thấy đoạn mã" text="Hãy thử từ khóa khác hoặc bỏ bớt bộ lọc." />
-          : <EmptyState title="Chưa có đoạn mã nào" text="Lưu các đoạn mã mẫu để tái sử dụng khi giảng dạy." action={<Button variant="primary" onClick={() => setForm({ sn: null })}><Plus className="h-4 w-4" />Thêm đoạn mã đầu tiên</Button>} />
-      ) : (<>
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {data.items.map(s => {
-            const gradeName = lookups?.gradeLevels.find(g => g.id === s.gradeLevelId)?.name
-            return (
-              <SnippetCard
-                key={s.id}
-                s={s}
-                gradeName={gradeName}
-                onView={() => setView(s)}
-                onEdit={() => setForm({ sn: s })}
-                onTagClick={setTag}
-              />
-            )
-          })}
+    <div className="flex h-full flex-col space-y-4">
+      {/* 1. Header & Primary Action */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2.5">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-slate-100">
+            Ngân hàng mã nguồn
+          </h1>
+          <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
+            {data ? `${data.total} đoạn mã` : '...'}
+          </span>
         </div>
-        <Pagination page={page} pageSize={20} total={data.total} onChange={setPage} />
-      </>)}
-      {view && !form && <SnippetDetail sn={view} onClose={() => setView(null)} onEdit={() => setForm({ sn: view })} onDelete={() => del(view)} />}
-      {form && <SnippetForm sn={form.sn} onClose={() => setForm(null)} onSaved={() => { setForm(null); setView(null); load() }} />}
+        <Button variant="primary" onClick={() => setForm({ sn: null })}>
+          <Plus className="h-4 w-4" />
+          Thêm đoạn mã
+        </Button>
+      </div>
+
+      {/* 2. Quick Stat Pill Badges (Languages) */}
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setLang('')}
+          className={cx(
+            'flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition shadow-2xs',
+            lang === ''
+              ? 'border-indigo-600 bg-indigo-50 font-semibold text-indigo-700 dark:border-indigo-500 dark:bg-indigo-950/60 dark:text-indigo-300'
+              : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400'
+          )}
+        >
+          <span>Tất cả ngôn ngữ</span>
+          <span className="rounded-full bg-slate-100 px-1.5 py-0.2 text-[10px] dark:bg-slate-800">
+            {data?.total ?? 0}
+          </span>
+        </button>
+
+        {lookups?.languages.map(l => {
+          const isSelected = lang === l
+          return (
+            <button
+              key={l}
+              type="button"
+              onClick={() => setLang(isSelected ? '' : l)}
+              className={cx(
+                'flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition shadow-2xs',
+                isSelected
+                  ? 'border-indigo-600 bg-indigo-50 font-semibold text-indigo-700 dark:border-indigo-500 dark:bg-indigo-950/60 dark:text-indigo-300 ring-2 ring-indigo-500/20'
+                  : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400'
+              )}
+            >
+              <span>{l}</span>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* 3. Search & Filter Bar */}
+      <div className="rounded-xl border border-slate-200/80 bg-white p-3 shadow-xs dark:border-slate-800/80 dark:bg-slate-900">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Ô tìm kiếm */}
+          <div className="relative min-w-[240px] flex-1">
+            <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <input
+              className={cx(inputCls, 'pl-9 pr-8')}
+              placeholder="Tìm theo tiêu đề, mô tả, nội dung mã..."
+              value={q}
+              onChange={e => setQ(e.target.value)}
+            />
+            {q && (
+              <button
+                type="button"
+                onClick={() => setQ('')}
+                className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Khối lớp */}
+          <CustomSelect
+            className="w-36"
+            value={grade}
+            placeholder="Tất cả khối"
+            onChange={val => {
+              setGrade(val)
+              setTopic('')
+            }}
+            options={[
+              { value: '', label: 'Tất cả khối' },
+              ...(lookups?.gradeLevels.map(g => ({ value: g.id, label: g.name })) ?? [])
+            ]}
+          />
+
+          {/* Chủ đề */}
+          <CustomSelect
+            className="min-w-[200px] max-w-[320px] flex-1 sm:flex-initial"
+            menuClassName="w-[360px] sm:w-[440px] max-w-[90vw]"
+            align="right"
+            value={topic}
+            placeholder="Tất cả chủ đề"
+            onChange={val => setTopic(val)}
+            options={[
+              { value: '', label: 'Tất cả chủ đề' },
+              ...(lookups?.topics
+                .filter(t => !grade || !t.gradeLevelId || t.gradeLevelId === Number(grade))
+                .map(t => ({ value: t.id, label: t.name })) ?? [])
+            ]}
+          />
+
+          {/* Tag đang lọc nếu có */}
+          {tag && (
+            <div className="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2.5 py-1.5 text-xs font-medium text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
+              <span>#{tag}</span>
+              <button
+                type="button"
+                onClick={() => setTag('')}
+                className="hover:text-indigo-900 dark:hover:text-white"
+                title="Bỏ lọc thẻ này"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          )}
+
+          {/* Nút Xóa lọc */}
+          {filtered && (
+            <button
+              type="button"
+              onClick={() => {
+                setQ('')
+                setLang('')
+                setGrade('')
+                setTopic('')
+                setTag('')
+              }}
+              className="inline-flex items-center gap-1 rounded-md px-2.5 py-2 text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition"
+              title="Đặt lại bộ lọc"
+            >
+              <RotateCcw className="h-4 w-4" />
+              <span>Xóa lọc</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 4. Snippets Grid Content */}
+      <section className="min-h-0 flex-1 overflow-y-auto">
+        {err ? (
+          <ErrorState message={err} onRetry={load} />
+        ) : !data ? (
+          <Spinner />
+        ) : data.total === 0 ? (
+          filtered ? (
+            <EmptyState
+              title="Không tìm thấy đoạn mã"
+              text="Hãy thử từ khóa khác hoặc bỏ bớt bộ lọc."
+              action={
+                <Button
+                  onClick={() => {
+                    setQ('')
+                    setLang('')
+                    setGrade('')
+                    setTopic('')
+                    setTag('')
+                  }}
+                >
+                  Xóa lọc
+                </Button>
+              }
+            />
+          ) : (
+            <EmptyState
+              title="Chưa có đoạn mã nào"
+              text="Lưu các đoạn mã mẫu để tái sử dụng khi giảng dạy."
+              action={
+                <Button variant="primary" onClick={() => setForm({ sn: null })}>
+                  <Plus className="h-4 w-4" />
+                  Thêm đoạn mã đầu tiên
+                </Button>
+              }
+            />
+          )
+        ) : (
+          <div className="space-y-4">
+            <div className="grid gap-3.5 md:grid-cols-2 xl:grid-cols-3">
+              {data.items.map(s => {
+                const gradeName = lookups?.gradeLevels.find(g => g.id === s.gradeLevelId)?.name
+                return (
+                  <SnippetCard
+                    key={s.id}
+                    s={s}
+                    gradeName={gradeName}
+                    onView={() => setView(s)}
+                    onEdit={() => setForm({ sn: s })}
+                    onTagClick={setTag}
+                  />
+                )
+              })}
+            </div>
+            <Pagination page={page} pageSize={20} total={data.total} onChange={setPage} />
+          </div>
+        )}
+      </section>
+
+      {view && !form && (
+        <SnippetDetail
+          sn={view}
+          onClose={() => setView(null)}
+          onEdit={() => setForm({ sn: view })}
+          onDelete={() => del(view)}
+        />
+      )}
+      {form && (
+        <SnippetForm
+          sn={form.sn}
+          onClose={() => setForm(null)}
+          onSaved={() => {
+            setForm(null)
+            setView(null)
+            load()
+          }}
+        />
+      )}
     </div>
   )
 }

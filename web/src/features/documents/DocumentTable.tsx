@@ -18,7 +18,8 @@ export default function DocumentTable({ items, onOpen, onFavorite, actions, sele
             {onSelect && <th className="w-8 px-3 py-2" />}
             <th className="px-3 py-2">Tiêu đề</th><th className="px-3 py-2">Loại</th><th className="px-3 py-2">Khối</th>
             <th className="px-3 py-2">Chủ đề</th><th className="px-3 py-2">Tệp đính kèm</th>
-            <th className="px-3 py-2">{dateField === 'deletedAt' ? 'Ngày xóa' : 'Cập nhật'}</th><th className="px-3 py-2 text-right">Thao tác</th>
+            <th className="px-3 py-2">{dateField === 'deletedAt' ? 'Ngày xóa' : 'Cập nhật'}</th>
+            {actions && <th className="px-3 py-2 text-right">Thao tác</th>}
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -40,7 +41,7 @@ export default function DocumentTable({ items, onOpen, onFavorite, actions, sele
                   <span className="max-w-[10rem] truncate">{d.file.originalName}</span> <span className="text-slate-400">{d.file.exists ? formatBytes(d.file.sizeBytes) : '(mất tệp)'}</span></span> : <span className="text-slate-400">—</span>}
               </td>
               <td className="whitespace-nowrap px-3 py-2 text-slate-500">{formatDate(dateField === 'deletedAt' ? d.deletedAt : d.updatedAt)}</td>
-              <td className="px-3 py-2 text-right">{actions?.(d)}</td>
+              {actions && <td className="px-3 py-2 text-right">{actions(d)}</td>}
             </tr>
           ))}
         </tbody>
