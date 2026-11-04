@@ -26,6 +26,7 @@ public sealed class ExerciseService(IAppDbContext db, ITagService tags, IValidat
         if (q.TopicId != null) query = query.Where(e => e.TopicId == q.TopicId);
         if (q.LessonId != null) query = query.Where(e => e.LessonId == q.LessonId);
         if (q.Difficulty != null) { var d = (Difficulty)q.Difficulty.Value; query = query.Where(e => e.Difficulty == d); }
+        if (q.ExerciseType != null) { var et = (ExerciseType)q.ExerciseType.Value; query = query.Where(e => e.ExerciseType == et); }
         if (!string.IsNullOrWhiteSpace(q.Language)) { var l = q.Language; query = query.Where(e => e.Language == l); }
         if (!string.IsNullOrWhiteSpace(q.Tag)) { var key = q.Tag.Trim().ToLowerInvariant(); query = query.Where(e => e.Tags.Any(t => t.Tag!.Key == key)); }
         var total = await query.CountAsync(ct);
@@ -74,12 +75,18 @@ public sealed class ExerciseService(IAppDbContext db, ITagService tags, IValidat
         e.TopicId = await CategoryGuard.ResolveTopicAsync(db, req.GradeLevelId, req.TopicId, req.LessonId, ct);
         e.LessonId = req.LessonId; e.GradeLevelId = req.GradeLevelId;
         e.Title = req.Title.Trim(); e.Statement = req.Statement; e.Difficulty = (Difficulty)req.Difficulty;
+        e.ExerciseType = (ExerciseType)req.ExerciseType;
+        e.OptionA = string.IsNullOrWhiteSpace(req.OptionA) ? null : req.OptionA.Trim();
+        e.OptionB = string.IsNullOrWhiteSpace(req.OptionB) ? null : req.OptionB.Trim();
+        e.OptionC = string.IsNullOrWhiteSpace(req.OptionC) ? null : req.OptionC.Trim();
+        e.OptionD = string.IsNullOrWhiteSpace(req.OptionD) ? null : req.OptionD.Trim();
+        e.CorrectAnswer = string.IsNullOrWhiteSpace(req.CorrectAnswer) ? null : req.CorrectAnswer.Trim().ToUpperInvariant();
         e.Language = string.IsNullOrWhiteSpace(req.Language) ? null : req.Language.Trim();
         e.Hint = req.Hint ?? ""; e.Solution = req.Solution ?? ""; e.SampleCode = req.SampleCode ?? "";
         var resolved = await tags.ResolveAsync(req.Tags, ct);
         e.Tags.RemoveAll(x => !resolved.Contains(x.Tag!));
         foreach (var t in resolved) if (!e.Tags.Any(x => x.Tag == t)) e.Tags.Add(new ExerciseTag { Tag = t });
-        e.SearchIndex = TextNormalizer.BuildIndex(e.Title, e.Statement, e.Hint, e.Solution, e.SampleCode, e.Language,
+        e.SearchIndex = TextNormalizer.BuildIndex(e.Title, e.Statement, e.OptionA, e.OptionB, e.OptionC, e.OptionD, e.Hint, e.Solution, e.SampleCode, e.Language,
             string.Join(' ', resolved.Select(t => t.Name)));
     }
 }

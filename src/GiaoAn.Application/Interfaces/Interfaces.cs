@@ -20,6 +20,7 @@ public interface IAppDbContext
     DbSet<CodeSnippetTag> CodeSnippetTags { get; }
     DbSet<CodeSnippet> CodeSnippets { get; }
     DbSet<Exercise> Exercises { get; }
+    DbSet<ExamMatrixTemplate> ExamMatrixTemplates { get; }
     DbSet<AppSetting> AppSettings { get; }
     DbSet<BackupHistory> BackupHistories { get; }
     DatabaseFacade Database { get; }
@@ -124,6 +125,15 @@ public interface IExerciseService
     Task<ExerciseDto> GetAsync(int id, CancellationToken ct);
     Task<ExerciseDto> CreateAsync(ExerciseSaveRequest req, CancellationToken ct);
     Task<ExerciseDto> UpdateAsync(int id, ExerciseSaveRequest req, CancellationToken ct);
+    Task DeleteAsync(int id, CancellationToken ct);
+}
+
+public interface IExamMatrixTemplateService
+{
+    Task<IReadOnlyList<ExamMatrixTemplateDto>> GetAllAsync(int? gradeLevelId, CancellationToken ct);
+    Task<ExamMatrixTemplateDto> GetAsync(int id, CancellationToken ct);
+    Task<ExamMatrixTemplateDto> CreateAsync(ExamMatrixTemplateSaveRequest req, CancellationToken ct);
+    Task<ExamMatrixTemplateDto> UpdateAsync(int id, ExamMatrixTemplateSaveRequest req, CancellationToken ct);
     Task DeleteAsync(int id, CancellationToken ct);
 }
 

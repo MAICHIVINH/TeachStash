@@ -52,6 +52,18 @@ public class ExerciseSaveRequestValidator : AbstractValidator<ExerciseSaveReques
         RuleFor(x => x.Solution).MaximumLength(200_000);
         RuleFor(x => x.SampleCode).MaximumLength(500_000);
         RuleFor(x => x.Tags).TagRules();
+        RuleFor(x => x.ExerciseType).InclusiveBetween(1, 2).WithMessage("Loại bài tập không hợp lệ.");
+    }
+}
+
+public class ExamMatrixTemplateSaveRequestValidator : AbstractValidator<ExamMatrixTemplateSaveRequest>
+{
+    public ExamMatrixTemplateSaveRequestValidator()
+    {
+        RuleFor(x => x.Name).NotEmpty().WithMessage("Vui lòng nhập tên mẫu ma trận.").MaximumLength(200);
+        RuleFor(x => x.GradeLevelId).GradeRule();
+        RuleFor(x => x.DurationMinutes).InclusiveBetween(5, 300).WithMessage("Thời gian làm bài từ 5 đến 300 phút.");
+        RuleFor(x => x.TotalScore).GreaterThan(0).WithMessage("Tổng điểm phải lớn hơn 0.");
     }
 }
 

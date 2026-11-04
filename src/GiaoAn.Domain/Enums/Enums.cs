@@ -8,4 +8,6 @@ public enum DocumentTypeKind
 
 public enum Difficulty { Recognize = 1, Understand = 2, Apply = 3, AdvancedApply = 4 }
 
+public enum ExerciseType { MultipleChoice = 1, EssayOrCoding = 2 }
+
 public enum BackupKind { Backup = 1, Restore = 2 }

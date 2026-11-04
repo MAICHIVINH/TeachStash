@@ -5,6 +5,7 @@ using GiaoAn.Application.Features.CodeSnippets;
 using GiaoAn.Application.Features.Dashboard;
 using GiaoAn.Application.Features.Documents;
 using GiaoAn.Application.Features.Exercises;
+using GiaoAn.Application.Features.ExamMatrices;
 using GiaoAn.Application.Features.Search;
 using GiaoAn.Application.Features.Tags;
 using GiaoAn.Application.Interfaces;
@@ -21,6 +22,7 @@ public static class DependencyInjection
         s.AddScoped<ICategoryService, CategoryService>();
         s.AddScoped<IDocumentService, DocumentService>();
         s.AddScoped<IExerciseService, ExerciseService>();
+        s.AddScoped<IExamMatrixTemplateService, ExamMatrixTemplateService>();
         s.AddScoped<ICodeSnippetService, CodeSnippetService>();
         s.AddScoped<IDashboardService, DashboardService>();
         s.AddScoped<ISearchService, SearchService>();

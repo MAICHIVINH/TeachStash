@@ -19,7 +19,12 @@ public static class Mapper
     public static ExerciseDto ToDto(Exercise e) =>
         new(e.Id, e.Title, e.Statement, e.GradeLevelId, e.TopicId, e.Topic?.Name, e.LessonId, e.Lesson?.Name,
             (int)e.Difficulty, e.Language, e.Hint, e.Solution, e.SampleCode, e.CreatedAt, e.UpdatedAt,
-            e.Tags.Select(t => t.Tag!.Name).OrderBy(n => n).ToList());
+            e.Tags.Select(t => t.Tag!.Name).OrderBy(n => n).ToList(),
+            (int)e.ExerciseType, e.OptionA, e.OptionB, e.OptionC, e.OptionD, e.CorrectAnswer);
+
+    public static ExamMatrixTemplateDto ToDto(ExamMatrixTemplate t) =>
+        new(t.Id, t.Name, t.GradeLevelId, t.GradeLevel?.Name, t.DurationMinutes, t.TotalScore,
+            t.HeaderSchool, t.HeaderExamName, t.MatrixDataJson, t.CreatedAt, t.UpdatedAt);
 
     public static SnippetDto ToDto(CodeSnippet s) =>
         new(s.Id, s.Title, s.Language, s.GradeLevelId, s.TopicId, s.Topic?.Name, s.LessonId, s.Lesson?.Name,

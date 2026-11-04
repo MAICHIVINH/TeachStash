@@ -116,3 +116,14 @@ public class BackupHistoryConfiguration : IEntityTypeConfiguration<BackupHistory
 {
     public void Configure(EntityTypeBuilder<BackupHistory> b) { b.Property(x => x.Kind).HasConversion<string>().HasMaxLength(20); b.Property(x => x.FilePath).HasMaxLength(500); }
 }
+
+public class ExamMatrixTemplateConfiguration : IEntityTypeConfiguration<ExamMatrixTemplate>
+{
+    public void Configure(EntityTypeBuilder<ExamMatrixTemplate> b)
+    {
+        b.Property(x => x.Name).HasMaxLength(200).IsRequired();
+        b.Property(x => x.HeaderSchool).HasMaxLength(200);
+        b.Property(x => x.HeaderExamName).HasMaxLength(200);
+        b.HasOne(x => x.GradeLevel).WithMany().HasForeignKey(x => x.GradeLevelId).OnDelete(DeleteBehavior.SetNull);
+    }
+}

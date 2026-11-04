@@ -90,6 +90,12 @@ public class Exercise : Entity, ISearchable
 {
     public string Title { get; set; } = "";
     public string Statement { get; set; } = "";
+    public ExerciseType ExerciseType { get; set; } = ExerciseType.MultipleChoice;
+    public string? OptionA { get; set; }
+    public string? OptionB { get; set; }
+    public string? OptionC { get; set; }
+    public string? OptionD { get; set; }
+    public string? CorrectAnswer { get; set; }
     public int? GradeLevelId { get; set; }
     public int? TopicId { get; set; }
     public Topic? Topic { get; set; }
@@ -104,6 +110,20 @@ public class Exercise : Entity, ISearchable
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public List<ExerciseTag> Tags { get; set; } = new();
+}
+
+public class ExamMatrixTemplate : Entity
+{
+    public string Name { get; set; } = "";
+    public int? GradeLevelId { get; set; }
+    public GradeLevel? GradeLevel { get; set; }
+    public int DurationMinutes { get; set; } = 45;
+    public double TotalScore { get; set; } = 10.0;
+    public string HeaderSchool { get; set; } = "";
+    public string HeaderExamName { get; set; } = "";
+    public string MatrixDataJson { get; set; } = "[]";
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }
 
 public class AppSetting { public string Key { get; set; } = ""; public string Value { get; set; } = ""; }

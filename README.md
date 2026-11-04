@@ -3,7 +3,7 @@
 Ứng dụng Windows Desktop **offline** cho giáo viên Tin học THPT: lưu trữ, phân loại, tìm kiếm và tái sử dụng giáo án, bài giảng, bài tập, đề kiểm tra, tài liệu tham khảo và mã nguồn mẫu.
 
 - **Backend:** .NET 9, ASP.NET Core Minimal API, EF Core + SQLite, FluentValidation (Clean Architecture)
-- **Frontend:** React 18 + TypeScript + Vite + Tailwind CSS 4 + Zustand, PDF.js, highlight.js, Lucide Icons
+- **Frontend:** React 18 + TypeScript + Vite + Tailwind CSS 4 + Zustand, Docx, JSZip, PDF.js, highlight.js, Lucide Icons
 - **Desktop:** WPF + WebView2 (server nội bộ chạy cùng tiến trình trên `127.0.0.1`, cổng ưu tiên cố định `5080`)
 - **Cloud Sync:** Tích hợp Google Drive API v3 (OAuth 2.0 PKCE / Loopback & Auth Code) sao lưu an toàn lên đám mây
 
@@ -11,37 +11,61 @@
 
 ## 🌟 Các tính năng chính (Key Features)
 
-### 1. Quản lý tài liệu & giáo án đa định dạng
-- Phân loại tài liệu theo **Loại** (Giáo án, Bài giảng, Đề kiểm tra, Bài tập, Chuyên đề...), **Khối lớp** (10, 11, 12), **Chủ đề** và **Bài học**.
+### 1. Trộn đề & Tạo đề kiểm tra tự động theo Ma trận GDPT 2018 (Mới ⭐)
+- **Quy trình 3 bước (Wizard) tinh gọn & chuyên nghiệp:**
+  - **Bước 1: Thiết lập đề thi & Ma trận phân bổ:**
+    - Cấu hình tiêu đề chuẩn: Tên trường/đơn vị, tên kỳ thi, khối lớp, môn học, thời gian làm bài.
+    - Lựa chọn linh hoạt số lượng mã đề cần tạo: 1 mã đề (101), 2 mã đề, 4 mã đề (101, 102, 103, 104) hoặc 8 mã đề.
+    - Lưới ma trận trực quan phân bổ theo **Chủ đề** và **4 mức độ nhận thức GDPT 2018** (*Nhận biết, Thông hiểu, Vận dụng, Vận dụng cao*). Tự động hiển thị số lượng câu hỏi khả dụng hiện có trong ngân hàng để cảnh báo giáo viên nếu thiếu câu.
+    - **Quản lý Mẫu ma trận đề:** Cho phép lưu cấu hình ma trận thành mẫu (ví dụ: *"Đề Giữa kỳ 1 - Tin 11"*) và nạp lại để tái sử dụng nhanh chóng cho các năm học tiếp theo.
+    - **Tùy chọn xáo trộn thông minh:** Tùy chọn đảo câu hỏi / đảo phương án A, B, C, D (tự động giữ nguyên 100% phương án gốc khi xuất 1 mã đề).
+  - **Bước 2: Xem trước đề thi gốc & Tinh chỉnh câu hỏi (Preview & Swap):**
+    - Hệ thống bốc ngẫu nhiên câu hỏi từ ngân hàng khớp theo ma trận.
+    - Mỗi câu hỏi đều có nút **"Đổi câu khác"** để đổi sang một câu hỏi khác trong ngân hàng có cùng chủ đề và mức độ nhận thức tức thời.
+  - **Bước 3: Trộn đề ngẫu nhiên & Tải về gói ZIP:**
+    - Ứng dụng thuật toán Fisher-Yates xáo trộn câu hỏi và đảo phương án lựa chọn độc lập cho từng mã đề.
+    - Đóng gói file `.zip` gồm các file Word (.docx) chuẩn phông Times New Roman 13pt, căn lề chuẩn văn bản giáo dục:
+      - Các file mã đề riêng lẻ: `De_101.docx`, `De_102.docx`, `De_103.docx`, `De_104.docx` (ẩn hoàn toàn các đường viền phụ, trình bày bảng phương án thoáng đẹp).
+      - File `DapAn_Va_MaTran.docx`: Chứa **Bảng soi đáp án trắc nghiệm chéo** tất cả các mã đề (giúp chấm thi siêu tốc), **Hướng dẫn chấm & Đáp án chi tiết tự luận** và **Bảng ma trận đặc tả đề thi GDPT 2018**.
+
+### 2. Ngân hàng bài tập & Hỗ trợ Trắc nghiệm A/B/C/D (Mới ⭐)
+- **Hỗ trợ 2 chế độ câu hỏi linh hoạt:**
+  - **Trắc nghiệm 4 lựa chọn (A, B, C, D):** Ô nhập đề bài, 4 ô nhập phương án rõ ràng, click nút tròn để đánh dấu nhanh đáp án đúng (tô màu xanh lục nổi bật).
+  - **Tự luận / Lập trình:** Đề bài, gợi ý thuật toán, lời giải chi tiết và trình soạn mã nguồn mẫu (CodeEditor).
+- **Trình bày trực quan:** Nhãn badge phân biệt rõ ràng `[Trắc nghiệm]` (xanh dương) và `[Tự luận]` (tím) trên cả thẻ hiển thị và bảng dữ liệu.
+- Phân cấp 4 mức độ nhận thức: **Nhận biết**, **Thông hiểu**, **Vận dụng**, **Vận dụng cao** kèm bộ lọc nhanh theo khối lớp, chủ đề, mức độ nhận thức và ngôn ngữ lập trình.
+- Nút **Sao chép đề bài nhanh** vào khay nhớ tạm để dán vào giáo án hoặc đề cương.
+
+### 3. Giao diện Bộ lọc ngang hiện đại (Modern Horizontal Filter Bar) (Mới ⭐)
+- Thay thế hoàn toàn thanh lọc dọc chiếm diện tích cũ bằng **Thanh lọc ngang 3 tầng hiện đại full-width (100% chiều rộng màn hình)** trên các trang: *Tất cả tài liệu*, *Giáo án*, *Bài giảng*, *Bài tập*, *Mã nguồn*.
+- **Dropdown chọn chủ đề tùy chỉnh (CustomSelect):** Tự động phát hiện vị trí mép phải màn hình để căn lề phù hợp, hỗ trợ tự động xuống dòng và hiển thị trọn vẹn các tên chủ đề dài của chương trình Tin học mới (không bị tràn màn hình hay bị che khuất).
+
+### 4. Lịch sử tìm kiếm Header (Search History) (Mới ⭐)
+- Ghi nhớ tự động các từ khóa tìm kiếm gần nhất ngay trên thanh tìm kiếm trên cùng.
+- Menu dropdown thả xuống hiển thị danh sách từ khóa đã tìm kiếm, cho phép nhấp để tìm lại ngay lập tức.
+- Cho phép xóa từng từ khóa hoặc xóa toàn bộ lịch sử tìm kiếm dễ dàng.
+
+### 5. Quản lý tài liệu & giáo án đa định dạng
+- Phân loại tài liệu theo **Loại** (Giáo án / KHBD, Bài giảng trình chiếu, Đề kiểm tra, Phiếu học tập, Tài liệu tham khảo...), **Khối lớp** (10, 11, 12), **Chủ đề** và **Bài học**.
 - Hỗ trợ xem trước (preview) trực tiếp trong ứng dụng:
   - **Tài liệu văn phòng:** PDF, Word (.docx), Excel (.xlsx, .xls), PowerPoint (.pptx).
   - **Hình ảnh & Văn bản thuần:** PNG, JPG, SVG, TXT, Markdown, CSV, JSON.
   - **Mã nguồn:** Tự động tô màu cú pháp (Syntax Highlighting) cho C++, Python, Pascal, C#, Java, JavaScript, HTML/CSS, SQL.
 - Quản lý tệp vật lý an toàn bằng mã định danh GUID, chống trùng lặp và thất lạc tệp tin.
 
-### 2. Ngân hàng bài tập & đề luyện tập (Exercises Bank)
-- Giao diện trực quan hỗ trợ 2 chế độ hiển thị linh hoạt: **Dạng lưới thẻ (Grid Cards)** và **Dạng bảng chi tiết (Table View)**.
-- Phân cấp 4 mức độ nhận thức chuẩn sư phạm: **Nhận biết**, **Thông hiểu**, **Vận dụng**, **Vận dụng cao** kèm thanh lọc nhanh trực quan.
-- Tích hợp trích đoạn đề bài, gợi ý giải thuật, lời giải chi tiết và mã nguồn mẫu.
-- Nút **Sao chép đề bài nhanh** vào khay nhớ tạm để giáo viên dán ngay vào giáo án hoặc đề thi Word/PowerPoint.
-
-### 3. Kho mã nguồn mẫu (Code Snippets)
-- Lưu trữ các thuật toán, bài giải mẫu, đoạn code mẫu giảng dạy theo từng ngôn ngữ (Python, C++, Pascal...).
+### 6. Kho mã nguồn mẫu (Code Snippets)
+- Lưu trữ các thuật toán, bài giải mẫu, đoạn code mẫu giảng dạy theo từng ngôn ngữ (Python, C++, Pascal, Scratch...).
 - Trình biên tập mã nguồn thông minh (giữ thụt lề, hỗ trợ Tab thụt dòng 4 dấu cách) và nút sao chép mã nguồn nhanh 1-click.
 
-### 4. Tìm kiếm thông minh & Thẻ nhãn (Tags)
-- Tìm kiếm toàn văn (Full-text Search) siêu tốc, tự động bỏ dấu tiếng Việt (ví dụ: gõ `"giao an"` vẫn tìm thấy `"giáo án"`).
-- Hệ thống gắn thẻ (Tags) linh hoạt giúp gom nhóm học liệu theo chuyên đề liên môn hoặc đợt ôn thi.
-
-### 5. Sao lưu nội bộ & Đồng bộ đám mây cá nhân (Google Drive Cloud Backup)
+### 7. Sao lưu nội bộ & Đồng bộ đám mây cá nhân (Google Drive Cloud Backup)
 - **Sao lưu ngoại tuyến (Local Backup):** Đóng gói toàn bộ cơ sở dữ liệu và tệp đính kèm thành tệp nén `.zip` tiêu chuẩn; hỗ trợ kiểm tra tính toàn vẹn (Validate) trước khi phục hồi.
 - **Đồng bộ Google Drive:**
-  - Kết nối bảo mật tài khoản cá nhân qua Google OAuth 2.0.
+  - Kết nối bảo mật tài khoản cá nhân qua Google OAuth 2.0 PKCE.
   - Tự động tải bản sao lưu mới nhất lên Google Drive phòng ngừa trường hợp máy tính bị hỏng, lỗi ổ cứng hoặc đổi máy mới.
   - Quản lý hạn mức lưu trữ tự động trên đám mây (giữ lại N bản gần nhất để tránh đầy bộ nhớ Drive).
   - Khôi phục dữ liệu trực tiếp từ đám mây Google Drive về máy tính chỉ với 1 cú nhấp chuột.
 
-### 6. Bảo mật & Thùng rác an toàn
+### 8. Bảo mật & Thùng rác an toàn
 - Hỗ trợ khóa bảo mật bằng mật khẩu khởi động và tự động khóa sau khoảng thời gian không thao tác.
 - Thùng rác (Recycle Bin) cho phép xem lại, khôi phục hoặc dọn dẹp vĩnh viễn các tài liệu đã xóa.
 
@@ -60,12 +84,12 @@
 ## 2. Cấu trúc dự án
 
 ```
-src/GiaoAn.Domain          Entity, enum, TextNormalizer (bỏ dấu tiếng Việt), TagName
-src/GiaoAn.Application     Use cases/services, DTOs, validators, interfaces (IFileStorage, IAppDbContext…)
-src/GiaoAn.Infrastructure  EF Core + SQLite, cấu hình entity, lưu tệp GUID, sao lưu/phục hồi, Google Drive sync
-src/GiaoAn.Server          Minimal API, middleware bảo mật/CSRF, ServerHost (khởi chạy server nền)
+src/GiaoAn.Domain          Entity (Exercise, ExamMatrixTemplate, Document...), enum, TextNormalizer
+src/GiaoAn.Application     Use cases/services (ExamMatrixTemplateService, ExerciseService...), DTOs, validators
+src/GiaoAn.Infrastructure  EF Core + SQLite, di trú tự động (DbInitializer), lưu tệp GUID, sao lưu, Google Drive
+src/GiaoAn.Server          Minimal API, endpoints, ServerHost (khởi chạy server nền)
 src/GiaoAn.Desktop         WPF + WebView2 (TeachStash.exe), nạp giao diện React nội bộ từ wwwroot
-web/                       Mã nguồn Frontend (React 18, TypeScript, Tailwind CSS, Vite)
+web/                       Mã nguồn Frontend (React 18, TypeScript, Tailwind CSS, Vite, Docx, JSZip)
 tests/                     xUnit: Domain, Application (SQLite in-memory), Server (HTTP integration tests)
 scripts/                   PowerShell scripts hỗ trợ dev, build, publish, đóng gói
 installer/                 Kịch bản Inno Setup đóng gói bộ cài (.exe)
@@ -207,9 +231,9 @@ Kết quả xuất ra tại:
 
 | Hiện tượng | Nguyên nhân & Cách xử lý |
 |---|---|
-| Thay đổi giao diện nhưng mở `TeachStash.exe` vẫn ra bản cũ | Chưa build lại web hoặc chưa đồng bộ `wwwroot`. Chạy: `cd web; npm run build; cd ..; dotnet build src/GiaoAn.Desktop` |
+| Thay đổi giao diện nhưng mở `TeachStash.exe` vẫn ra bản cũ | Nhấn `Ctrl + F5` trực tiếp trong ứng dụng hoặc build lại web: `cd web; npm run build; cd ..; dotnet build src/GiaoAn.Desktop` |
 | Báo lỗi cổng 5174 hoặc 5080 đang bận | Một tiến trình Vite hoặc .NET cũ đang chạy ngầm. Mở Task Manager hoặc lệnh PowerShell tắt tiến trình `GiaoAn.Server` / `node` cũ |
 | “Máy chưa cài WebView2 Runtime” | Cài đặt WebView2 Evergreen Runtime từ trang chủ Microsoft |
 | Mở Desktop trắng tinh | Đảm bảo thư mục `web/dist/index.html` đã tồn tại trước khi biên dịch Desktop |
-| Lỗi migration cơ sở dữ liệu | Nếu schema thay đổi lúc dev, có thể tạm xóa `giaoan.db` thử nghiệm; ứng dụng sẽ tự khởi tạo lại cấu trúc mới nhất qua `EnsureCreated()` |
+| Lỗi migration cơ sở dữ liệu | Ứng dụng tự động kiểm tra và nâng cấp bảng, thêm cột mới qua `DbInitializer` mà không làm mất dữ liệu cũ |
 | Lỗi đăng nhập Google Drive (redirect URI mismatch) | Đảm bảo server chạy đúng cổng cố định `5080` và đã thêm `http://127.0.0.1:5080/api/gdrive/callback` vào Authorized redirect URIs trên Google Cloud Console |

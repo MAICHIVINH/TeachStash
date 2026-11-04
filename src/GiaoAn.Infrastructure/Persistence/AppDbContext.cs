@@ -20,6 +20,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<CodeSnippetTag> CodeSnippetTags => Set<CodeSnippetTag>();
     public DbSet<CodeSnippet> CodeSnippets => Set<CodeSnippet>();
     public DbSet<Exercise> Exercises => Set<Exercise>();
+    public DbSet<ExamMatrixTemplate> ExamMatrixTemplates => Set<ExamMatrixTemplate>();
     public DbSet<AppSetting> AppSettings => Set<AppSetting>();
     public DbSet<BackupHistory> BackupHistories => Set<BackupHistory>();
 

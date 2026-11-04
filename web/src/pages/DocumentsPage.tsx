@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { Eye, Pencil, Plus, RotateCcw, Search, SlidersHorizontal, Star, Trash2, X } from 'lucide-react'
+import { Link, useSearchParams } from 'react-router-dom'
+import { Eye, Pencil, Plus, RotateCcw, Search, Shuffle, SlidersHorizontal, Star, Trash2, X } from 'lucide-react'
 import { api, type DocFilters } from '../services/api'
 import { errText, useApp } from '../stores/appStore'
 import { Button, CustomSelect, EmptyState, ErrorState, Pagination, Spinner, cx, inputCls, useDebounced } from '../components/ui'
@@ -125,10 +125,20 @@ export default function DocumentsPage() {
             {data ? `${data.total} tài liệu` : '...'}
           </span>
         </div>
-        <Button variant="primary" onClick={() => setForm({ doc: null })}>
-          <Plus className="h-4 w-4" />
-          Thêm tài liệu
-        </Button>
+        <div className="flex items-center gap-2">
+          {routeType === 4 && (
+            <Link to="/exam-generator">
+              <Button className="border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300">
+                <Shuffle className="h-4 w-4" />
+                Tạo đề từ ma trận
+              </Button>
+            </Link>
+          )}
+          <Button variant="primary" onClick={() => setForm({ doc: null })}>
+            <Plus className="h-4 w-4" />
+            Thêm tài liệu
+          </Button>
+        </div>
       </div>
 
       {/* 2. Quick Stat Pill Badges */}

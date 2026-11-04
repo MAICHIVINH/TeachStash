@@ -22,14 +22,51 @@ export interface FacetItem { key: string; name: string; count: number }
 export interface Facets { types: FacetItem[]; grades: FacetItem[]; topics: FacetItem[]; tags: FacetItem[]; languages: FacetItem[] }
 export interface Paged<T> { items: T[]; total: number; page: number; pageSize: number; facets?: Facets | null }
 
+export type ExerciseType = 1 | 2 // 1: MultipleChoice, 2: EssayOrCoding
+
 export interface Exercise {
   id: number; title: string; statement: string; gradeLevelId: number | null; topicId: number | null; topicName: string | null
   lessonId: number | null; lessonName: string | null; difficulty: number; language: string | null
   hint: string; solution: string; sampleCode: string; createdAt: string; updatedAt: string; tags: string[]
+  exerciseType?: number; optionA?: string | null; optionB?: string | null; optionC?: string | null; optionD?: string | null
+  correctAnswer?: string | null
 }
 export interface ExerciseSave {
   title: string; statement: string; gradeLevelId: number | null; topicId: number | null; lessonId: number | null
   difficulty: number; language: string | null; hint: string; solution: string; sampleCode: string; tags: string[]
+  exerciseType?: number; optionA?: string | null; optionB?: string | null; optionC?: string | null; optionD?: string | null
+  correctAnswer?: string | null
+}
+
+export interface MatrixTopicRow {
+  topicId: number
+  topicName: string
+  mcq: { recognize: number; understand: number; apply: number; advanced: number }
+  essay: { recognize: number; understand: number; apply: number; advanced: number }
+}
+
+export interface ExamMatrixTemplate {
+  id: number
+  name: string
+  gradeLevelId: number | null
+  gradeLevelName: string | null
+  durationMinutes: number
+  totalScore: number
+  headerSchool: string
+  headerExamName: string
+  matrixDataJson: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ExamMatrixTemplateSave {
+  name: string
+  gradeLevelId: number | null
+  durationMinutes: number
+  totalScore: number
+  headerSchool?: string
+  headerExamName?: string
+  matrixDataJson: string
 }
 export interface Snippet {
   id: number; title: string; language: string; gradeLevelId: number | null; topicId: number | null; topicName: string | null

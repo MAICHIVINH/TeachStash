@@ -82,6 +82,15 @@ export const api = {
     id ? request<T.Exercise>('PUT', `/api/exercises/${id}`, b) : request<T.Exercise>('POST', '/api/exercises', b),
   deleteExercise: (id: number) => request<void>('DELETE', `/api/exercises/${id}`),
 
+  examMatrixTemplates: (gradeLevelId?: number | null) =>
+    request<T.ExamMatrixTemplate[]>('GET', '/api/exam-matrix-templates' + qs({ gradeLevelId })),
+  getExamMatrixTemplate: (id: number) =>
+    request<T.ExamMatrixTemplate>('GET', `/api/exam-matrix-templates/${id}`),
+  saveExamMatrixTemplate: (id: number | null, b: T.ExamMatrixTemplateSave) =>
+    id ? request<T.ExamMatrixTemplate>('PUT', `/api/exam-matrix-templates/${id}`, b) : request<T.ExamMatrixTemplate>('POST', '/api/exam-matrix-templates', b),
+  deleteExamMatrixTemplate: (id: number) =>
+    request<void>('DELETE', `/api/exam-matrix-templates/${id}`),
+
   snippets: (f: Record<string, unknown>) => request<T.Paged<T.Snippet>>('GET', '/api/snippets' + qs(f)),
   saveSnippet: (id: number | null, b: T.SnippetSave) =>
     id ? request<T.Snippet>('PUT', `/api/snippets/${id}`, b) : request<T.Snippet>('POST', '/api/snippets', b),

@@ -20,6 +20,7 @@ public static class ApiEndpoints
         MapLookups(api);
         MapDocuments(api);
         MapExercises(api);
+        MapExamMatrixTemplates(api);
         MapSnippets(api);
         MapMisc(api);
         MapBackups(api);
@@ -147,6 +148,28 @@ public static class ApiEndpoints
         { var d = await s.CreateAsync(r, ct); return Results.Created($"/api/exercises/{d.Id}", d); });
         g.MapPut("/{id:int}", async (int id, ExerciseSaveRequest r, IExerciseService s, CancellationToken ct) => Results.Ok(await s.UpdateAsync(id, r, ct)));
         g.MapDelete("/{id:int}", async (int id, IExerciseService s, CancellationToken ct) => { await s.DeleteAsync(id, ct); return Results.NoContent(); });
+    }
+
+    // ---------- Mẫu ma trận đề thi ----------
+    private static void MapExamMatrixTemplates(RouteGroupBuilder api)
+    {
+        var g = api.MapGroup("/exam-matrix-templates");
+        g.MapGet("", async (IExamMatrixTemplateService s, [FromQuery] int? gradeLevelId, CancellationToken ct) =>
+            Results.Ok(await s.GetAllAsync(gradeLevelId, ct)));
+        g.MapGet("/{id:int}", async (int id, IExamMatrixTemplateService s, CancellationToken ct) =>
+            Results.Ok(await s.GetAsync(id, ct)));
+        g.MapPost("", async (ExamMatrixTemplateSaveRequest r, IExamMatrixTemplateService s, CancellationToken ct) =>
+        {
+            var d = await s.CreateAsync(r, ct);
+            return Results.Created($"/api/exam-matrix-templates/{d.Id}", d);
+        });
+        g.MapPut("/{id:int}", async (int id, ExamMatrixTemplateSaveRequest r, IExamMatrixTemplateService s, CancellationToken ct) =>
+            Results.Ok(await s.UpdateAsync(id, r, ct)));
+        g.MapDelete("/{id:int}", async (int id, IExamMatrixTemplateService s, CancellationToken ct) =>
+        {
+            await s.DeleteAsync(id, ct);
+            return Results.NoContent();
+        });
     }
 
     // ---------- Mã nguồn ----------

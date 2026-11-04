@@ -9,6 +9,7 @@
     "preview": "vite preview --port 5174"
   },
   "dependencies": {
+    "docx": "^9.15.1",
     "docx-preview": "^0.4.1",
     "highlight.js": "^11.12.0",
     "jszip": "^3.10.2",

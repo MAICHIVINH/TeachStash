@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { BookOpen, ClipboardCheck, Code2, DatabaseBackup, FileText, FolderOpen, GraduationCap, History, LayoutDashboard, Library, ListChecks, Lock, Moon, Presentation, Search, Settings, Sun, Trash2, X, type LucideIcon } from 'lucide-react'
+import { BookOpen, ClipboardCheck, Code2, DatabaseBackup, FileText, FolderOpen, GraduationCap, History, LayoutDashboard, Library, ListChecks, Lock, Moon, Presentation, Search, Settings, Shuffle, Sun, Trash2, X, type LucideIcon } from 'lucide-react'
 import { useApp } from '../stores/appStore'
 import { api } from '../services/api'
 import { cx } from '../components/ui'
@@ -40,6 +40,7 @@ const groups: { title: string; items: NavItem[] }[] = [
   {
     title: 'NGÂN HÀNG HỌC LIỆU', items: [
       { to: '/exercises', label: 'Bài tập', icon: ListChecks },
+      { to: '/exam-generator', label: 'Trộn đề kiểm tra', icon: Shuffle },
       { to: '/snippets', label: 'Ngân hàng mã nguồn', icon: Code2 },
       { to: '/documents?type=4', label: 'Đề kiểm tra', icon: Library, type: '4' },
     ]

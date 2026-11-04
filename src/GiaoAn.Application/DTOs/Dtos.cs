@@ -60,11 +60,19 @@ public record OrphanCleanupDto(int FilesDeleted, long BytesFreed);
 
 public record ExerciseDto(int Id, string Title, string Statement, int? GradeLevelId, int? TopicId, string? TopicName,
     int? LessonId, string? LessonName, int Difficulty, string? Language, string Hint, string Solution, string SampleCode,
-    DateTime CreatedAt, DateTime UpdatedAt, IReadOnlyList<string> Tags);
+    DateTime CreatedAt, DateTime UpdatedAt, IReadOnlyList<string> Tags,
+    int ExerciseType = 1, string? OptionA = null, string? OptionB = null, string? OptionC = null, string? OptionD = null,
+    string? CorrectAnswer = null);
 public class ExerciseSaveRequest
 {
     public string Title { get; set; } = "";
     public string Statement { get; set; } = "";
+    public int ExerciseType { get; set; } = 1;
+    public string? OptionA { get; set; }
+    public string? OptionB { get; set; }
+    public string? OptionC { get; set; }
+    public string? OptionD { get; set; }
+    public string? CorrectAnswer { get; set; }
     public int? GradeLevelId { get; set; }
     public int? TopicId { get; set; }
     public int? LessonId { get; set; }
@@ -78,7 +86,7 @@ public class ExerciseSaveRequest
 public class ExerciseQuery
 {
     public string? Q { get; set; } public int? GradeLevelId { get; set; } public int? TopicId { get; set; }
-    public int? LessonId { get; set; } public int? Difficulty { get; set; } public string? Language { get; set; }
+    public int? LessonId { get; set; } public int? Difficulty { get; set; } public int? ExerciseType { get; set; } public string? Language { get; set; }
     public string? Tag { get; set; } public int? Page { get; set; } = 1; public int? PageSize { get; set; } = 20;
 }
 
@@ -121,3 +129,18 @@ public class ChangePasswordRequest { public string CurrentPassword { get; set; }
 public record SettingsDto(string Theme, int AutoLockMinutes, string ExtraExtensions, string DataRoot,
     IReadOnlyList<string> AllowedExtensions, int MaxFileSizeMb);
 public class SettingsUpdateRequest { public string? Theme { get; set; } public int? AutoLockMinutes { get; set; } public string? ExtraExtensions { get; set; } }
+
+public record ExamMatrixTemplateDto(int Id, string Name, int? GradeLevelId, string? GradeLevelName,
+    int DurationMinutes, double TotalScore, string HeaderSchool, string HeaderExamName,
+    string MatrixDataJson, DateTime CreatedAt, DateTime UpdatedAt);
+
+public class ExamMatrixTemplateSaveRequest
+{
+    public string Name { get; set; } = "";
+    public int? GradeLevelId { get; set; }
+    public int DurationMinutes { get; set; } = 45;
+    public double TotalScore { get; set; } = 10.0;
+    public string? HeaderSchool { get; set; }
+    public string? HeaderExamName { get; set; }
+    public string MatrixDataJson { get; set; } = "[]";
+}

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   BookOpen,
   Code2,
@@ -16,6 +16,7 @@ import {
   Plus,
   RotateCcw,
   Search,
+  Shuffle,
   Sparkles,
   Trash2,
   X
@@ -217,6 +218,12 @@ export default function ExercisesPage() {
             </button>
           </div>
 
+          <Link to="/exam-generator">
+            <Button className="border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300">
+              <Shuffle className="h-4 w-4" />
+              Tạo đề từ ma trận
+            </Button>
+          </Link>
           <Button variant="primary" onClick={() => setForm({ ex: null })}>
             <Plus className="h-4 w-4" />
             Thêm bài tập
@@ -429,7 +436,14 @@ export default function ExercisesPage() {
                           {cfg.label}
                         </span>
 
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+                            (e.exerciseType === 1 || Boolean(e.optionA || e.optionB))
+                              ? 'bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800/60'
+                              : 'bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800/60'
+                          }`}>
+                            {(e.exerciseType === 1 || Boolean(e.optionA || e.optionB)) ? 'Trắc nghiệm' : 'Tự luận'}
+                          </span>
                           {e.language && (
                             <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-mono font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                               <Code2 className="h-3 w-3 text-indigo-500" />
@@ -577,8 +591,17 @@ export default function ExercisesPage() {
                           </span>
                         </td>
                         <td className="px-4 py-3.5 align-top">
-                          <div className="font-semibold text-slate-800 group-hover:text-indigo-600 dark:text-slate-100 dark:group-hover:text-indigo-400">
-                            {e.title}
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-slate-800 group-hover:text-indigo-600 dark:text-slate-100 dark:group-hover:text-indigo-400">
+                              {e.title}
+                            </span>
+                            <span className={`inline-flex items-center rounded px-1.5 py-0.2 text-[10px] font-semibold ${
+                              (e.exerciseType === 1 || Boolean(e.optionA || e.optionB))
+                                ? 'bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800/60'
+                                : 'bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800/60'
+                            }`}>
+                              {(e.exerciseType === 1 || Boolean(e.optionA || e.optionB)) ? 'Trắc nghiệm' : 'Tự luận'}
+                            </span>
                           </div>
                           <p className="mt-1 line-clamp-2 text-xs text-slate-500 dark:text-slate-400">
                             {e.statement}
