@@ -42,4 +42,14 @@ export const useApp = create<AppState>((set, get) => ({
   resolveConfirm: v => { get().confirmState?.resolve(v); set({ confirmState: null }) },
 }))
 
-export const errText = (e: unknown) => (e instanceof Error ? e.message : 'Đã xảy ra lỗi.')
+export const errText = (e: unknown) => {
+  if (e && typeof e === 'object') {
+    const anyE = e as any
+    if (anyE.errors && typeof anyE.errors === 'object') {
+      const msgs = Object.values(anyE.errors).flat().filter(Boolean)
+      if (msgs.length > 0) return msgs.join(' ')
+    }
+    if (typeof anyE.message === 'string') return anyE.message
+  }
+  return e instanceof Error ? e.message : 'Đã xảy ra lỗi.'
+}

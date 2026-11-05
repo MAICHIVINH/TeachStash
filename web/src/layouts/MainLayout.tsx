@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { BookOpen, CalendarCheck, ClipboardCheck, Code2, DatabaseBackup, FileText, FolderOpen, GraduationCap, History, LayoutDashboard, Library, ListChecks, Lock, Moon, PanelLeftClose, PanelLeftOpen, Presentation, Search, Settings, Shuffle, Sun, Trash2, X, type LucideIcon } from 'lucide-react'
+import { BookOpen, CalendarCheck, ClipboardCheck, Code2, DatabaseBackup, FileText, FolderOpen, GraduationCap, History, LayoutDashboard, Library, ListChecks, Lock, Moon, PanelLeftClose, PanelLeftOpen, Presentation, Search, Settings, Shuffle, Sun, Trash2, X, Sparkles, type LucideIcon } from 'lucide-react'
 import { useApp } from '../stores/appStore'
 import { api } from '../services/api'
 import { cx } from '../components/ui'
+import { AiAssistantDrawer } from '../features/ai/AiAssistantDrawer'
 
 const SEARCH_HISTORY_KEY = 'teachstash_search_history'
 const MAX_HISTORY = 8
@@ -67,6 +68,7 @@ export default function MainLayout({ onLock }: { onLock: () => void }) {
   const [q, setQ] = useState('')
   const [history, setHistory] = useState<string[]>(getStoredHistory)
   const [showHistory, setShowHistory] = useState(false)
+  const [aiDrawerOpen, setAiDrawerOpen] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const [collapsed, setCollapsed] = useState(() => {
     try {
@@ -295,7 +297,16 @@ export default function MainLayout({ onLock }: { onLock: () => void }) {
               </div>
             )}
           </form>
-          <div className="ml-auto flex items-center gap-1">
+          <div className="ml-auto flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setAiDrawerOpen(true)}
+              title="Trợ lý AI Soạn bài (Gemini)"
+              className="flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-gradient-to-r from-indigo-50/80 to-purple-50/80 px-2.5 py-1.5 text-xs font-semibold text-indigo-700 shadow-xs hover:border-indigo-300 hover:from-indigo-100 hover:to-purple-100 dark:border-indigo-800/80 dark:from-indigo-950/60 dark:to-purple-950/40 dark:text-indigo-300 dark:hover:border-indigo-700 transition"
+            >
+              <Sparkles className="h-4 w-4 text-amber-500 animate-pulse" />
+              <span className="hidden sm:inline">Trợ lý AI</span>
+            </button>
             <button onClick={toggleTheme} title="Đổi giao diện sáng/tối" className="rounded-md p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
               <Sun className="hidden h-5 w-5 dark:block" /><Moon className="h-5 w-5 dark:hidden" />
             </button>
@@ -304,6 +315,8 @@ export default function MainLayout({ onLock }: { onLock: () => void }) {
         </header>
         <main className="min-h-0 flex-1 overflow-y-auto p-5"><Outlet /></main>
       </div>
+
+      <AiAssistantDrawer open={aiDrawerOpen} onClose={() => setAiDrawerOpen(false)} />
     </div>
   )
 }

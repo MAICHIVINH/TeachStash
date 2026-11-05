@@ -10,6 +10,19 @@ public static class DbInitializer
 
     public static async Task InitializeAsync(AppDbContext db, CancellationToken ct = default)
     {
+        try
+        {
+            // Bật chế độ WAL (Write-Ahead Logging) cho SQLite để hỗ trợ đọc/ghi đồng thời
+            // và tăng thời gian chờ khóa (busy timeout) tránh lỗi "database is locked"
+            await db.Database.ExecuteSqlRawAsync("PRAGMA journal_mode = 'WAL';", ct);
+            await db.Database.ExecuteSqlRawAsync("PRAGMA busy_timeout = 30000;", ct);
+            await db.Database.ExecuteSqlRawAsync("PRAGMA synchronous = NORMAL;", ct);
+        }
+        catch
+        {
+            // Bỏ qua nếu SQLite provider hoặc môi trường không cho phép thay đổi PRAGMA
+        }
+
         // Có migration thì dùng migration; chưa tạo migration thì tạo schema trực tiếp từ model.
         if (db.Database.GetMigrations().Any()) await db.Database.MigrateAsync(ct);
         else await db.Database.EnsureCreatedAsync(ct);

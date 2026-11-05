@@ -57,7 +57,33 @@
 - Phân cấp 4 mức độ nhận thức: **Nhận biết**, **Thông hiểu**, **Vận dụng**, **Vận dụng cao** kèm bộ lọc nhanh theo khối lớp, chủ đề, mức độ nhận thức và ngôn ngữ lập trình.
 - Nút **Sao chép đề bài nhanh** vào khay nhớ tạm để dán vào giáo án hoặc đề cương.
 
-### 3. Giao diện Bộ lọc ngang hiện đại (Modern Horizontal Filter Bar) (Mới ⭐)
+### 3. Trợ lý AI Hỗ trợ Soạn bài (Google Gemini API Cá nhân) (Mới ⭐)
+- **Thiết kế dạng Side Panel / Drawer bên phải:**
+  - Nút biểu tượng Robot AI thông minh trên thanh Header cho phép mở nhanh trợ lý ở bất kỳ màn hình nào mà không làm gián đoạn luồng làm việc.
+  - Lưu trữ API Key cục bộ an toàn trong máy tính, hỗ trợ đa dạng các model mới nhất: **`gemini-3.8-flash`** (mặc định), `gemini-2.5-flash`, `gemini-2.5-pro`, `gemini-2.0-flash`, `gemini-1.5-flash`, `gemini-1.5-pro` và tùy chọn tự nhập model bất kỳ.
+- **3 Công cụ sư phạm đắc lực 3-trong-1:**
+  1. **Tạo câu hỏi trắc nghiệm SGK tự động:** Dán một đoạn văn bản kiến thức SGK $\rightarrow$ AI sinh 4 câu hỏi trắc nghiệm theo đúng 4 mức độ nhận thức (Nhận biết, Thông hiểu, Vận dụng, Vận dụng cao) kèm đáp án đúng và lời giải chi tiết. Hỗ trợ **Sao chép tất cả** và nút **Lưu thẳng vào Ngân hàng bài tập** 1-chạm.
+  2. **Sinh Testcase bài tập lập trình:** Nhập đề bài toán (C++, Python...) $\rightarrow$ AI gợi ý 5–10 bộ testcase biên (Edge Cases: số 0, số âm, giá trị cực đại, chuỗi rỗng...) kèm giải thích trường hợp kiểm thử. Hỗ trợ **Sao chép bảng Markdown** và **Tải file text/zip** để chấm thi.
+  3. **Soạn mục tiêu bài dạy theo Công văn 5512:** Nhập tên bài học và khối lớp $\rightarrow$ AI soạn thảo hoàn chỉnh mục tiêu theo chuẩn 3 phần (Kiến thức, Năng lực chung + Năng lực Tin học NLa–NLe, Phẩm chất), sẵn sàng sao chép dán vào file Word giáo án.
+- **Cấu hình & Kiểm tra kết nối:** Tích hợp kiểm tra kết nối (Ping test) ngay trong Drawer và trang Cài đặt (Settings).
+
+### 4. Xuất nhanh Phiếu học tập / Bài tập ra Word (.docx) (Mới ⭐)
+- **Tích chọn linh hoạt trong Kho bài tập:**
+  - Ô checkbox chọn bài trên cả chế độ **Lưới thẻ** và **Danh sách**.
+  - Nút **"Chọn tất cả trong trang"** giúp chọn nhanh cả trang 20 câu chỉ với 1 click.
+  - **Thanh tác vụ nổi (Floating Action Bar):** Tự động nổi lên khi có $\ge 1$ bài được tích chọn, hiển thị số lượng bài đã chọn và nút mở hộp thoại xuất file Word.
+- **Hộp thoại tùy chỉnh trước khi xuất (Modal):**
+  - Tùy chỉnh tiêu đề phiếu (*Phiếu bài tập, Phiếu học tập, Bài tập về nhà, Phiếu ôn tập*).
+  - Tên trường, môn học (Tin học), tên lớp/khối và thời gian làm bài (phút).
+  - Tùy chỉnh số dòng kẻ làm bài (4 - 12 dòng) và kiểu dòng kẻ (dòng chấm ly hoặc gạch mờ).
+  - Tùy chọn bật/tắt trang Đáp án & Hướng dẫn giải chi tiết cho giáo viên.
+- **Tự động co giãn cấu trúc theo câu hỏi được chọn:**
+  - *Nếu chỉ chọn Trắc nghiệm:* Xuất đề trắc nghiệm kèm **Bảng khung điền đáp án** (ô số câu 1, 2, 3... để học sinh tô A/B/C/D).
+  - *Nếu chỉ chọn Tự luận:* Xuất các bài tự luận kèm các dòng kẻ chấm/ly làm bài.
+  - *Nếu chọn cả Trắc nghiệm + Tự luận:* Tự động chia rõ thành `PHẦN I: TRẮC NGHIỆM` (kèm bảng đáp án) và `PHẦN II: TỰ LUẬN` (kèm dòng kẻ làm bài).
+  - Xuất file `.docx` chuẩn A4 Dọc, font Times New Roman, căn lề 20mm chuẩn in ấn.
+
+### 4. Giao diện Bộ lọc ngang hiện đại (Modern Horizontal Filter Bar) (Mới ⭐)
 - Thay thế hoàn toàn thanh lọc dọc chiếm diện tích cũ bằng **Thanh lọc ngang 3 tầng hiện đại full-width (100% chiều rộng màn hình)** trên các trang: *Tất cả tài liệu*, *Giáo án*, *Bài giảng*, *Bài tập*, *Mã nguồn*.
 - **Dropdown chọn chủ đề tùy chỉnh (CustomSelect):** Tự động phát hiện vị trí mép phải màn hình để căn lề phù hợp, hỗ trợ tự động xuống dòng và hiển thị trọn vẹn các tên chủ đề dài của chương trình Tin học mới (không bị tràn màn hình hay bị che khuất).
 

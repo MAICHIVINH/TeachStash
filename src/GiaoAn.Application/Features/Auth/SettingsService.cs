@@ -21,6 +21,9 @@ public static class SettingKeys
     public const string GoogleDriveAutoUpload = "GoogleDrive_AutoUpload";
     public const string GoogleDriveMaxBackups = "GoogleDrive_MaxBackups";
     public const string GoogleDriveRedirectUri = "GoogleDrive_RedirectUri";
+
+    public const string GeminiApiKey = "Gemini_ApiKey";
+    public const string GeminiModel = "Gemini_Model";
 }
 
 public sealed class SettingsService(IAppDbContext db, IAppPaths paths, IFilePolicy policy) : ISettingsService

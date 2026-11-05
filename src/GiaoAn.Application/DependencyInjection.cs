@@ -1,4 +1,5 @@
 using FluentValidation;
+using GiaoAn.Application.Features.Ai;
 using GiaoAn.Application.Features.Auth;
 using GiaoAn.Application.Features.Categories;
 using GiaoAn.Application.Features.CodeSnippets;
@@ -31,6 +32,7 @@ public static class DependencyInjection
         s.AddScoped<ISettingsService, SettingsService>();
         s.AddScoped<IFilePolicy, FilePolicy>();
         s.AddScoped<IAuthService, AuthService>();
+        s.AddScoped<IAiAssistantService, GeminiAiService>();
         return s;
     }
 }

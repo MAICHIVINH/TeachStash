@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Check, ChevronDown, ChevronUp, Copy, HardDrive, KeyRound, Layers, Lock, Monitor, Moon, Pencil, Plus, ShieldCheck, Sun, Trash2, Unlink } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Copy, HardDrive, KeyRound, Layers, Lock, Monitor, Moon, Pencil, Plus, ShieldCheck, Sun, Trash2, Unlink, Sparkles, ExternalLink, Eye, EyeOff } from 'lucide-react'
 import { api } from '../services/api'
 import { errText, useApp, type ThemeMode } from '../stores/appStore'
 import { Badge, Button, Field, Modal, Spinner, inputCls } from '../components/ui'
-import type { Settings } from '../types'
+import type { Settings, AiModelOption } from '../types'
 import { formatBytes } from '../utils/format'
 
 function Card({
@@ -670,6 +670,205 @@ function Security({ s, reload }: { s: Settings; reload: () => void }) {
   )
 }
 
+function AiSettingsCard() {
+  const { toast } = useApp()
+  const [loading, setLoading] = useState(true)
+  const [hasKey, setHasKey] = useState(false)
+  const [maskedKey, setMaskedKey] = useState<string | null>(null)
+  const [keyInput, setKeyInput] = useState('')
+  const [showKey, setShowKey] = useState(false)
+  const [model, setModel] = useState('gemini-1.5-flash')
+  const [customModel, setCustomModel] = useState('')
+  const [availableModels, setAvailableModels] = useState<AiModelOption[]>([])
+  const [testing, setTesting] = useState(false)
+  const [saving, setSaving] = useState(false)
+
+  const MODEL_OPTIONS = [
+    { value: 'gemini-1.5-flash', label: 'gemini-1.5-flash (Khuyến nghị - Ổn định, miễn phí)' },
+    { value: 'gemini-2.5-flash', label: 'gemini-2.5-flash (Thế hệ 2.5 cực nhanh)' },
+    { value: 'gemini-2.5-pro', label: 'gemini-2.5-pro (Thế hệ 2.5 suy luận sâu)' },
+    { value: 'gemini-2.0-flash', label: 'gemini-2.0-flash (Thế hệ 2.0 đa năng)' },
+    { value: 'gemini-1.5-pro', label: 'gemini-1.5-pro (Ngữ cảnh lớn 2M tokens)' },
+    { value: 'custom', label: 'Tùy chỉnh (Nhập tên model khác)...' }
+  ]
+
+  const load = async () => {
+    try {
+      const res = await api.ai.settings()
+      setHasKey(res.hasKey)
+      setMaskedKey(res.maskedKey)
+      if (res.hasKey) {
+        api.ai.models().then(setAvailableModels).catch(() => {})
+      }
+      if (res.currentModel) {
+        const found = MODEL_OPTIONS.some(m => m.value === res.currentModel)
+        if (found) {
+          setModel(res.currentModel)
+        } else {
+          setModel('custom')
+          setCustomModel(res.currentModel)
+        }
+      }
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { load() }, [])
+
+  const testConnection = async () => {
+    setTesting(true)
+    try {
+      const activeModel = model === 'custom' ? customModel.trim() : model
+      await api.ai.testConnection({
+        apiKey: keyInput.trim() || undefined,
+        model: activeModel || undefined
+      })
+      api.ai.models(keyInput.trim() || undefined).then(setAvailableModels).catch(() => {})
+      toast('success', 'Kết nối Google Gemini API thành công! Khóa và Model hoạt động tốt.')
+    } catch (e: any) {
+      toast('error', errText(e))
+    } finally {
+      setTesting(false)
+    }
+  }
+
+  const save = async () => {
+    setSaving(true)
+    try {
+      const activeModel = model === 'custom' ? customModel.trim() : model
+      const updated = await api.ai.saveSettings({
+        apiKey: keyInput.trim() || undefined,
+        model: activeModel || undefined
+      })
+      setHasKey(updated.hasKey)
+      setMaskedKey(updated.maskedKey)
+      setKeyInput('')
+      toast('success', 'Đã lưu cấu hình Trợ lý AI (Gemini) thành công.')
+    } catch (e: any) {
+      toast('error', errText(e))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <Card
+      title="Trợ lý AI (Google Gemini)"
+      icon={Sparkles}
+      description="Cấu hình API Key và Model phục vụ tự động tạo trắc nghiệm SGK, sinh testcase và mục tiêu CV 5512"
+      action={
+        <a
+          href="https://aistudio.google.com/app/apikey"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:underline dark:text-indigo-400 font-medium"
+        >
+          Lấy API Key tại Google AI Studio <ExternalLink className="h-3 w-3" />
+        </a>
+      }
+    >
+      {loading ? <Spinner /> : (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Gemini API Key cá nhân:
+                </label>
+                {hasKey && (
+                  <Badge className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+                    Đã lưu: {maskedKey}
+                  </Badge>
+                )}
+              </div>
+              <div className="relative">
+                <input
+                  type={showKey ? 'text' : 'password'}
+                  placeholder={hasKey ? 'Để trống nếu không đổi, hoặc dán key mới (AIzaSy...)' : 'Dán chuỗi API Key vào đây (AIzaSy...)'}
+                  value={keyInput}
+                  onChange={e => setKeyInput(e.target.value)}
+                  className={inputCls}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowKey(!showKey)}
+                  className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <p className="mt-1 text-[11px] text-slate-400">
+                Key được lưu cục bộ trên máy tính cá nhân trong cơ sở dữ liệu nội bộ.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                Model Gemini:
+              </label>
+              <select
+                value={model}
+                onChange={e => setModel(e.target.value)}
+                className={inputCls}
+              >
+                {availableModels.length > 0 && (
+                  <optgroup label="Model có sẵn trong tài khoản Google của bạn:">
+                    {availableModels.map(m => (
+                      <option key={m.id} value={m.id}>
+                        {m.id} ({m.displayName})
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                <optgroup label="Model đề xuất:">
+                  {MODEL_OPTIONS.map(m => (
+                    <option key={m.value} value={m.value}>
+                      {m.label}
+                    </option>
+                  ))}
+                </optgroup>
+              </select>
+
+              {model === 'custom' && (
+                <div className="mt-2">
+                  <input
+                    type="text"
+                    value={customModel}
+                    onChange={e => setCustomModel(e.target.value)}
+                    placeholder="Nhập tên model (ví dụ: gemini-3.8-flash, gemini-exp-1206...)"
+                    className={inputCls}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3 dark:border-slate-800">
+            <Button
+              variant="secondary"
+              loading={testing}
+              onClick={testConnection}
+              disabled={!keyInput.trim() && !hasKey}
+            >
+              Kiểm tra kết nối
+            </Button>
+            <Button
+              variant="primary"
+              loading={saving}
+              onClick={save}
+            >
+              Lưu cấu hình AI
+            </Button>
+          </div>
+        </div>
+      )}
+    </Card>
+  )
+}
+
 export default function SettingsPage() {
   const { theme, setTheme, toast } = useApp()
   const [s, setS] = useState<Settings | null>(null)
@@ -800,6 +999,9 @@ export default function SettingsPage() {
 
       {/* Quản lý danh mục, bài học */}
       <Categories />
+
+      {/* Cấu hình Trợ lý AI (Google Gemini) */}
+      <AiSettingsCard />
 
       {/* Bảo mật */}
       <Security s={s} reload={load} />

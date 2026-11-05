@@ -2,6 +2,7 @@ using GiaoAn.Application.Interfaces;
 using GiaoAn.Infrastructure.FileStorage;
 using GiaoAn.Infrastructure.Persistence;
 using GiaoAn.Infrastructure.Services;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -13,7 +14,13 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection s, IAppPaths paths)
     {
         s.AddSingleton(paths);
-        s.AddDbContext<AppDbContext>(o => o.UseSqlite($"Data Source={paths.DbPath}"));
+        var cs = new SqliteConnectionStringBuilder
+        {
+            DataSource = paths.DbPath,
+            DefaultTimeout = 30,
+            Mode = SqliteOpenMode.ReadWriteCreate
+        }.ToString();
+        s.AddDbContext<AppDbContext>(o => o.UseSqlite(cs));
         s.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
         s.AddSingleton<IFileStorage, LocalFileStorage>();
         s.AddSingleton<IFileOpener, ShellFileOpener>();

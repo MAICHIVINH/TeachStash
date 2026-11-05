@@ -209,3 +209,70 @@ export interface UpdateProgressRequest {
   teacherNotes?: string | null
   customDocIds?: number[]
 }
+
+export interface AiSettings {
+  hasKey: boolean
+  maskedKey: string | null
+  currentModel: string
+}
+
+export interface AiModelOption {
+  id: string
+  displayName: string
+  description: string
+}
+
+export interface AiSettingsUpdate {
+  apiKey?: string | null
+  model?: string | null
+}
+
+export interface GeneratedMcqItem {
+  statement: string
+  difficulty: number
+  difficultyName: string
+  optionA: string
+  optionB: string
+  optionC: string
+  optionD: string
+  correctAnswer: string
+  solution: string
+  hint: string
+}
+
+export interface GeneratedTestcaseItem {
+  index: number
+  input: string
+  output: string
+  explanation: string
+  isEdgeCase: boolean
+}
+
+export interface GenerateMcqParams {
+  text: string
+  gradeLevelId?: number | null
+  topicId?: number | null
+  count?: number
+}
+
+export interface GenerateTestcasesParams {
+  statement: string
+  language?: string
+  count?: number
+}
+
+export interface GenerateObjectivesParams {
+  lessonName: string
+  gradeLevelId?: number | null
+  extraRequirements?: string
+}
+
+export interface GenerateObjectivesResponse {
+  objectivesMarkdown: string
+}
+
+export interface SaveGeneratedExercisesParams {
+  gradeLevelId?: number | null
+  topicId?: number | null
+  questions: GeneratedMcqItem[]
+}

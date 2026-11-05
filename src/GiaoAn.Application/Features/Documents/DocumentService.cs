@@ -99,8 +99,15 @@ public sealed class DocumentService(IAppDbContext db, IFileStorage storage, IFil
             ?? throw new NotFoundException("Không tìm thấy tài liệu.");
         if (markAccessed && !doc.IsDeleted)
         {
-            doc.LastAccessedAt = DateTime.UtcNow;
-            await db.SaveChangesAsync(ct);
+            try
+            {
+                doc.LastAccessedAt = DateTime.UtcNow;
+                await db.SaveChangesAsync(ct);
+            }
+            catch
+            {
+                // Ghi nhận lần truy cập là thao tác phụ, không để lỗi khóa DB làm gián đoạn việc tải tài liệu
+            }
         }
         return Mapper.ToDto(doc, storage, true);
     }

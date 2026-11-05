@@ -5,6 +5,7 @@ import {
   Code2,
   Copy,
   Check,
+  Download,
   Eye,
   Filter,
   GraduationCap,
@@ -26,6 +27,7 @@ import { errText, useApp } from '../stores/appStore'
 import { Badge, Button, CustomSelect, EmptyState, ErrorState, Pagination, Spinner, TagChips, cx, inputCls, useDebounced } from '../components/ui'
 import { copyText } from '../components/CodeBlock'
 import { ExerciseDetail, ExerciseForm } from '../features/exercises/ExerciseParts'
+import { WorksheetExportModal } from '../features/exercises/WorksheetExportModal'
 import type { Exercise } from '../types'
 import { DIFFICULTIES, DIFFICULTY_STYLE } from '../utils/format'
 
@@ -89,6 +91,69 @@ export default function ExercisesPage() {
   const [form, setForm] = useState<{ ex: Exercise | null } | null>(params.get('new') ? { ex: null } : null)
   const [view, setView] = useState<Exercise | null>(null)
   const [copiedId, setCopiedId] = useState<number | null>(null)
+
+  // Quản lý tích chọn bài tập để xuất phiếu bài tập
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+  const [selectedExercisesMap, setSelectedExercisesMap] = useState<Map<number, Exercise>>(new Map())
+  const [exportModalOpen, setExportModalOpen] = useState(false)
+
+  const toggleSelect = (eItem: Exercise, ev?: React.MouseEvent) => {
+    ev?.stopPropagation()
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(eItem.id)) {
+        next.delete(eItem.id)
+        setSelectedExercisesMap(map => {
+          const nextMap = new Map(map)
+          nextMap.delete(eItem.id)
+          return nextMap
+        })
+      } else {
+        next.add(eItem.id)
+        setSelectedExercisesMap(map => {
+          const nextMap = new Map(map)
+          nextMap.set(eItem.id, eItem)
+          return nextMap
+        })
+      }
+      return next
+    })
+  }
+
+  const toggleSelectAllCurrentPage = () => {
+    if (!data?.items) return
+    const currentItems = data.items
+    const allCurrentSelected = currentItems.length > 0 && currentItems.every(i => selectedIds.has(i.id))
+
+    if (allCurrentSelected) {
+      setSelectedIds(prev => {
+        const next = new Set(prev)
+        currentItems.forEach(i => next.delete(i.id))
+        return next
+      })
+      setSelectedExercisesMap(map => {
+        const nextMap = new Map(map)
+        currentItems.forEach(i => nextMap.delete(i.id))
+        return nextMap
+      })
+    } else {
+      setSelectedIds(prev => {
+        const next = new Set(prev)
+        currentItems.forEach(i => next.add(i.id))
+        return next
+      })
+      setSelectedExercisesMap(map => {
+        const nextMap = new Map(map)
+        currentItems.forEach(i => nextMap.set(i.id, i))
+        return nextMap
+      })
+    }
+  }
+
+  const clearSelection = () => {
+    setSelectedIds(new Set())
+    setSelectedExercisesMap(new Map())
+  }
 
   useEffect(() => {
     if (params.get('new')) setParams({}, { replace: true })
@@ -217,6 +282,17 @@ export default function ExercisesPage() {
               <span className="hidden sm:inline">Danh sách</span>
             </button>
           </div>
+
+          {selectedIds.size > 0 && (
+            <Button
+              variant="secondary"
+              onClick={() => setExportModalOpen(true)}
+              className="border-indigo-300 bg-indigo-50 font-semibold text-indigo-700 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950 dark:text-indigo-300"
+            >
+              <Download className="h-4 w-4" />
+              Xuất phiếu ({selectedIds.size})
+            </Button>
+          )}
 
           <Link to="/exam-generator">
             <Button className="border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300">
@@ -409,32 +485,93 @@ export default function ExercisesPage() {
         )
       ) : (
         <div className="space-y-4">
+          {/* Thanh chọn tất cả bài tập trong trang hiện tại */}
+          <div className="flex items-center justify-between px-1 text-xs text-slate-500 dark:text-slate-400">
+            <button
+              type="button"
+              onClick={toggleSelectAllCurrentPage}
+              className="inline-flex items-center gap-2 font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition"
+            >
+              <div
+                className={cx(
+                  'flex h-4 w-4 items-center justify-center rounded border transition',
+                  data.items.length > 0 && data.items.every(i => selectedIds.has(i.id))
+                    ? 'border-indigo-600 bg-indigo-600 text-white'
+                    : 'border-slate-300 bg-white hover:border-indigo-500 dark:border-slate-700 dark:bg-slate-800'
+                )}
+              >
+                {data.items.length > 0 && data.items.every(i => selectedIds.has(i.id)) && (
+                  <Check className="h-3 w-3 stroke-[3]" />
+                )}
+              </div>
+              <span>
+                {data.items.length > 0 && data.items.every(i => selectedIds.has(i.id))
+                  ? 'Bỏ chọn cả trang'
+                  : 'Chọn tất cả bài tập trong trang này'}
+              </span>
+            </button>
+
+            {selectedIds.size > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+                  Đã chọn {selectedIds.size} bài
+                </span>
+                <button
+                  type="button"
+                  onClick={clearSelection}
+                  className="text-slate-400 hover:text-rose-600 transition"
+                >
+                  (Bỏ chọn)
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* A. Grid View */}
           {viewMode === 'grid' ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {data.items.map(e => {
                 const cfg = DIFFICULTY_CONFIG[e.difficulty] || DIFFICULTY_CONFIG[2]
+                const isSelected = selectedIds.has(e.id)
                 return (
                   <div
                     key={e.id}
                     onClick={() => setView(e)}
                     className={cx(
-                      'group relative flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-4 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md cursor-pointer dark:border-slate-800/90 dark:bg-slate-900',
-                      cfg.border
+                      'group relative flex flex-col justify-between rounded-xl border bg-white p-4 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md cursor-pointer dark:bg-slate-900',
+                      isSelected
+                        ? 'border-indigo-500 ring-2 ring-indigo-500/30 bg-indigo-50/15 dark:border-indigo-500 dark:bg-indigo-950/20'
+                        : `${cfg.border} border-slate-200/90 dark:border-slate-800/90`
                     )}
                   >
                     <div>
                       {/* Top Badges */}
                       <div className="flex items-center justify-between gap-2">
-                        <span
-                          className={cx(
-                            'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold',
-                            cfg.badge
-                          )}
-                        >
-                          <span className={cx('h-1.5 w-1.5 rounded-full', cfg.dot)} />
-                          {cfg.label}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={ev => toggleSelect(e, ev)}
+                            className={cx(
+                              'flex h-4 w-4 shrink-0 items-center justify-center rounded border transition',
+                              isSelected
+                                ? 'border-indigo-600 bg-indigo-600 text-white'
+                                : 'border-slate-300 bg-white hover:border-indigo-500 dark:border-slate-700 dark:bg-slate-800'
+                            )}
+                            title={isSelected ? 'Bỏ chọn bài này' : 'Chọn bài này vào phiếu bài tập'}
+                          >
+                            {isSelected && <Check className="h-3 w-3 stroke-[3]" />}
+                          </button>
+
+                          <span
+                            className={cx(
+                              'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold',
+                              cfg.badge
+                            )}
+                          >
+                            <span className={cx('h-1.5 w-1.5 rounded-full', cfg.dot)} />
+                            {cfg.label}
+                          </span>
+                        </div>
 
                         <div className="flex items-center gap-1.5">
                           <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold ${
@@ -562,6 +699,23 @@ export default function ExercisesPage() {
               <table className="w-full text-left text-sm">
                 <thead className="border-b border-slate-200 bg-slate-50/75 text-xs font-semibold text-slate-600 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-300">
                   <tr>
+                    <th className="w-10 px-3 py-3 text-center">
+                      <button
+                        type="button"
+                        onClick={toggleSelectAllCurrentPage}
+                        className={cx(
+                          'flex h-4 w-4 items-center justify-center rounded border transition mx-auto',
+                          data.items.length > 0 && data.items.every(i => selectedIds.has(i.id))
+                            ? 'border-indigo-600 bg-indigo-600 text-white'
+                            : 'border-slate-300 bg-white hover:border-indigo-500 dark:border-slate-600 dark:bg-slate-800'
+                        )}
+                        title="Chọn tất cả bài tập trong trang"
+                      >
+                        {data.items.length > 0 && data.items.every(i => selectedIds.has(i.id)) && (
+                          <Check className="h-3 w-3 stroke-[3]" />
+                        )}
+                      </button>
+                    </th>
                     <th className="px-4 py-3">Mức độ</th>
                     <th className="px-4 py-3">Bài tập & Đề bài</th>
                     <th className="px-4 py-3">Chủ đề</th>
@@ -573,12 +727,31 @@ export default function ExercisesPage() {
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {data.items.map(e => {
                     const cfg = DIFFICULTY_CONFIG[e.difficulty] || DIFFICULTY_CONFIG[2]
+                    const isSelected = selectedIds.has(e.id)
                     return (
                       <tr
                         key={e.id}
                         onClick={() => setView(e)}
-                        className="group cursor-pointer transition hover:bg-slate-50/80 dark:hover:bg-slate-800/50"
+                        className={cx(
+                          'group cursor-pointer transition hover:bg-slate-50/80 dark:hover:bg-slate-800/50',
+                          isSelected && 'bg-indigo-50/40 dark:bg-indigo-950/25'
+                        )}
                       >
+                        <td className="w-10 px-3 py-3.5 align-top text-center" onClick={ev => ev.stopPropagation()}>
+                          <button
+                            type="button"
+                            onClick={ev => toggleSelect(e, ev)}
+                            className={cx(
+                              'flex h-4 w-4 items-center justify-center rounded border transition mx-auto mt-0.5',
+                              isSelected
+                                ? 'border-indigo-600 bg-indigo-600 text-white'
+                                : 'border-slate-300 bg-white hover:border-indigo-500 dark:border-slate-600 dark:bg-slate-800'
+                            )}
+                            title={isSelected ? 'Bỏ chọn' : 'Chọn bài này'}
+                          >
+                            {isSelected && <Check className="h-3 w-3 stroke-[3]" />}
+                          </button>
+                        </td>
                         <td className="whitespace-nowrap px-4 py-3.5 align-top">
                           <span
                             className={cx(
@@ -736,6 +909,52 @@ export default function ExercisesPage() {
             setView(null)
             load()
           }}
+        />
+      )}
+
+      {/* 6. Floating Action Bar khi có bài tập được chọn */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2 transform transition-all duration-300 ease-out">
+          <div className="flex items-center gap-3 rounded-2xl border border-indigo-200 bg-white/95 px-5 py-3 shadow-2xl backdrop-blur-md dark:border-indigo-900/80 dark:bg-slate-900/95 dark:shadow-indigo-950/50">
+            <div className="flex items-center gap-2.5 border-r border-slate-200 pr-4 dark:border-slate-800">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white shadow-xs">
+                {selectedIds.size}
+              </span>
+              <div className="text-xs">
+                <span className="font-semibold text-slate-800 dark:text-slate-100">
+                  Đã chọn {selectedIds.size} bài tập
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearSelection}
+                className="text-xs text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400"
+              >
+                Bỏ chọn
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setExportModalOpen(true)}
+                className="shadow-md shadow-indigo-600/20"
+              >
+                <Download className="h-4 w-4" />
+                Xuất phiếu bài tập (Word)
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 7. Modal Xuất phiếu bài tập ra Word */}
+      {exportModalOpen && (
+        <WorksheetExportModal
+          exercises={Array.from(selectedExercisesMap.values())}
+          onClose={() => setExportModalOpen(false)}
         />
       )}
     </div>

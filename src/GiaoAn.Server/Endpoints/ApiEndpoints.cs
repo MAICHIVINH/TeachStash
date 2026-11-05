@@ -27,6 +27,7 @@ public static class ApiEndpoints
         MapTeachingClasses(api);
         MapBackups(api);
         MapGoogleDrive(api);
+        MapAiAssistant(api);
     }
 
     // ---------- Auth ----------
@@ -366,5 +367,33 @@ public static class ApiEndpoints
                 : $@"<!DOCTYPE html><html><head><meta charset='utf-8'><title>Lỗi xác thực</title><style>body{{font-family:sans-serif;text-align:center;padding:50px;background:#fff1f2;color:#9f1239}}</style></head><body><h2>Xác thực không thành công</h2><p>{error ?? "Không nhận được mã xác thực từ Google."}</p><script>if(window.opener){{window.opener.postMessage({{type:'gdrive_auth_error',error:'{error}'}},'*');}}</script></body></html>";
             return Results.Content(html, "text/html; charset=utf-8");
         });
+    }
+
+    private static void MapAiAssistant(RouteGroupBuilder api)
+    {
+        var g = api.MapGroup("/ai");
+        g.MapGet("/settings", async (IAiAssistantService s, CancellationToken ct) =>
+            Results.Ok(await s.GetSettingsAsync(ct)));
+
+        g.MapGet("/models", async (string? key, IAiAssistantService s, CancellationToken ct) =>
+            Results.Ok(await s.GetAvailableModelsAsync(key, ct)));
+
+        g.MapPut("/settings", async (AiSettingsUpdateRequest r, IAiAssistantService s, CancellationToken ct) =>
+            Results.Ok(await s.SaveSettingsAsync(r, ct)));
+
+        g.MapPost("/test-connection", async (AiTestConnectionRequest r, IAiAssistantService s, CancellationToken ct) =>
+            Results.Ok(new { success = await s.TestConnectionAsync(r, ct), message = "Kết nối Gemini API thành công!" }));
+
+        g.MapPost("/generate-mcq", async (GenerateMcqRequest r, IAiAssistantService s, CancellationToken ct) =>
+            Results.Ok(await s.GenerateMcqAsync(r, ct)));
+
+        g.MapPost("/generate-testcases", async (GenerateTestcasesRequest r, IAiAssistantService s, CancellationToken ct) =>
+            Results.Ok(await s.GenerateTestcasesAsync(r, ct)));
+
+        g.MapPost("/generate-lesson-objectives", async (GenerateLessonObjectivesRequest r, IAiAssistantService s, CancellationToken ct) =>
+            Results.Ok(await s.GenerateLessonObjectivesAsync(r, ct)));
+
+        g.MapPost("/save-exercises", async (SaveGeneratedExercisesRequest r, IAiAssistantService s, CancellationToken ct) =>
+            Results.Ok(new { count = await s.SaveGeneratedExercisesAsync(r, ct), message = "Đã lưu câu hỏi vào Ngân hàng bài tập thành công." }));
     }
 }

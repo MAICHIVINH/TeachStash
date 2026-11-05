@@ -18,7 +18,9 @@ async function request<R>(method: string, url: string, body?: unknown): Promise<
   try { data = text ? JSON.parse(text) : null } catch { /* không phải JSON */ }
   if (!res.ok) {
     if (res.status === 401 && data?.code === 'locked') window.dispatchEvent(new Event('gat-locked'))
-    throw new ApiError(data?.message ?? `Lỗi ${res.status}`, res.status, data?.errors ?? undefined)
+    const errorDetails = data?.errors ? Object.values(data.errors).flat().filter(Boolean).join(' ') : null
+    const finalMsg = errorDetails || data?.message || `Lỗi ${res.status}`
+    throw new ApiError(finalMsg, res.status, data?.errors ?? undefined)
   }
   return data as R
 }
@@ -143,5 +145,21 @@ export const api = {
     restoreConfirm: (fileId: string, path: string) => request<T.BackupInfo>('POST', `/api/gdrive/restore-confirm/${fileId}`, { path, confirm: true }),
     downloadUrl: (fileId: string) => `/api/gdrive/download/${fileId}`,
     openBrowser: (url: string) => request<{ success: boolean }>('POST', '/api/gdrive/open-browser', { url }),
+  },
+
+  ai: {
+    settings: () => request<T.AiSettings>('GET', '/api/ai/settings'),
+    models: (key?: string) => request<T.AiModelOption[]>('GET', '/api/ai/models' + qs({ key })),
+    saveSettings: (body: T.AiSettingsUpdate) => request<T.AiSettings>('PUT', '/api/ai/settings', body),
+    testConnection: (body?: { apiKey?: string; model?: string }) =>
+      request<{ success: boolean; message: string }>('POST', '/api/ai/test-connection', body || {}),
+    generateMcq: (params: T.GenerateMcqParams) =>
+      request<T.GeneratedMcqItem[]>('POST', '/api/ai/generate-mcq', params),
+    generateTestcases: (params: T.GenerateTestcasesParams) =>
+      request<T.GeneratedTestcaseItem[]>('POST', '/api/ai/generate-testcases', params),
+    generateLessonObjectives: (params: T.GenerateObjectivesParams) =>
+      request<T.GenerateObjectivesResponse>('POST', '/api/ai/generate-lesson-objectives', params),
+    saveGeneratedExercises: (params: T.SaveGeneratedExercisesParams) =>
+      request<{ count: number; message: string }>('POST', '/api/ai/save-exercises', params),
   },
 }
