@@ -29,4 +29,11 @@ public static class Mapper
     public static SnippetDto ToDto(CodeSnippet s) =>
         new(s.Id, s.Title, s.Language, s.GradeLevelId, s.TopicId, s.Topic?.Name, s.LessonId, s.Lesson?.Name,
             s.Description, s.Code, s.CreatedAt, s.UpdatedAt, s.Tags.Select(t => t.Tag!.Name).OrderBy(n => n).ToList());
+
+    public static TeachingPlanItemDto ToDto(TeachingPlanItem i) =>
+        new(i.Id, i.GradeLevelId, i.WeekNumber, i.PeriodNumber, i.PeriodName, i.Title, i.NumberOfPeriods, i.Equipment, i.Location,
+            i.TopicId, i.Topic?.Name, i.LessonId, i.Lesson?.Name, i.Notes, i.SortOrder, i.CreatedAt, i.UpdatedAt);
+
+    public static DocumentBriefDto ToBriefDto(Document d) =>
+        new(d.Id, d.Title, d.DocumentTypeId, d.DocumentType?.Name ?? "", d.File?.Extension, d.File?.RelativePath);
 }

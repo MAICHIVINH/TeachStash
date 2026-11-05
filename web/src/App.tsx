@@ -13,6 +13,7 @@ import BackupPage from './pages/BackupPage'
 import SettingsPage from './pages/SettingsPage'
 import SearchPage from './pages/SearchPage'
 import ExamGeneratorPage from './pages/ExamGeneratorPage'
+import TeachingPlanPage from './pages/TeachingPlanPage'
 import { ArrowRight, Eye, EyeOff, KeyRound, Lock, ShieldCheck } from 'lucide-react'
 
 function LockScreen({ onDone }: { onDone: () => void }) {
@@ -177,6 +178,7 @@ export default function App() {
       <Routes>
         <Route element={<MainLayout onLock={async () => { await api.logout().catch(() => { }); setLocked(true) }} />}>
           <Route index element={<DashboardPage />} />
+          <Route path="teaching-plan" element={<TeachingPlanPage />} />
           <Route path="documents" element={<DocumentsPage />} />
           <Route path="exercises" element={<ExercisesPage />} />
           <Route path="exam-generator" element={<ExamGeneratorPage />} />

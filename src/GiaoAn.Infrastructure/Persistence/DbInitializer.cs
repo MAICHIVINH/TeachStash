@@ -41,6 +41,47 @@ public static class DbInitializer
                     ""CreatedAt"" TEXT NOT NULL,
                     ""UpdatedAt"" TEXT NOT NULL,
                     CONSTRAINT ""FK_ExamMatrixTemplates_GradeLevels_GradeLevelId"" FOREIGN KEY (""GradeLevelId"") REFERENCES ""GradeLevels"" (""Id"") ON DELETE SET NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS ""TeachingPlanItems"" (
+                    ""Id"" INTEGER NOT NULL CONSTRAINT ""PK_TeachingPlanItems"" PRIMARY KEY AUTOINCREMENT,
+                    ""GradeLevelId"" INTEGER NOT NULL,
+                    ""WeekNumber"" INTEGER NOT NULL,
+                    ""PeriodNumber"" INTEGER NOT NULL,
+                    ""Title"" TEXT NOT NULL,
+                    ""TopicId"" INTEGER NULL,
+                    ""LessonId"" INTEGER NULL,
+                    ""Notes"" TEXT NOT NULL DEFAULT '',
+                    ""SortOrder"" INTEGER NOT NULL DEFAULT 0,
+                    ""CreatedAt"" TEXT NOT NULL,
+                    ""UpdatedAt"" TEXT NOT NULL,
+                    CONSTRAINT ""FK_TeachingPlanItems_GradeLevels_GradeLevelId"" FOREIGN KEY (""GradeLevelId"") REFERENCES ""GradeLevels"" (""Id"") ON DELETE CASCADE,
+                    CONSTRAINT ""FK_TeachingPlanItems_Topics_TopicId"" FOREIGN KEY (""TopicId"") REFERENCES ""Topics"" (""Id"") ON DELETE SET NULL,
+                    CONSTRAINT ""FK_TeachingPlanItems_Lessons_LessonId"" FOREIGN KEY (""LessonId"") REFERENCES ""Lessons"" (""Id"") ON DELETE SET NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS ""TeachingClasses"" (
+                    ""Id"" INTEGER NOT NULL CONSTRAINT ""PK_TeachingClasses"" PRIMARY KEY AUTOINCREMENT,
+                    ""Name"" TEXT NOT NULL,
+                    ""GradeLevelId"" INTEGER NOT NULL,
+                    ""AcademicYear"" TEXT NOT NULL DEFAULT '2026-2027',
+                    ""SortOrder"" INTEGER NOT NULL DEFAULT 0,
+                    ""CreatedAt"" TEXT NOT NULL,
+                    ""UpdatedAt"" TEXT NOT NULL,
+                    CONSTRAINT ""FK_TeachingClasses_GradeLevels_GradeLevelId"" FOREIGN KEY (""GradeLevelId"") REFERENCES ""GradeLevels"" (""Id"") ON DELETE CASCADE
+                );
+
+                CREATE TABLE IF NOT EXISTS ""TeachingProgresses"" (
+                    ""Id"" INTEGER NOT NULL CONSTRAINT ""PK_TeachingProgresses"" PRIMARY KEY AUTOINCREMENT,
+                    ""ClassId"" INTEGER NOT NULL,
+                    ""PlanItemId"" INTEGER NOT NULL,
+                    ""Status"" INTEGER NOT NULL DEFAULT 0,
+                    ""ActualDate"" TEXT NULL,
+                    ""TeacherNotes"" TEXT NOT NULL DEFAULT '',
+                    ""CustomDocumentIdsJson"" TEXT NOT NULL DEFAULT '[]',
+                    ""UpdatedAt"" TEXT NOT NULL,
+                    CONSTRAINT ""FK_TeachingProgresses_TeachingClasses_ClassId"" FOREIGN KEY (""ClassId"") REFERENCES ""TeachingClasses"" (""Id"") ON DELETE CASCADE,
+                    CONSTRAINT ""FK_TeachingProgresses_TeachingPlanItems_PlanItemId"" FOREIGN KEY (""PlanItemId"") REFERENCES ""TeachingPlanItems"" (""Id"") ON DELETE CASCADE
                 );", ct);
 
             var columns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -68,6 +109,26 @@ public static class DbInitializer
                 await db.Database.ExecuteSqlRawAsync("ALTER TABLE \"Exercises\" ADD COLUMN \"OptionD\" TEXT NULL;", ct);
             if (!columns.Contains("CorrectAnswer"))
                 await db.Database.ExecuteSqlRawAsync("ALTER TABLE \"Exercises\" ADD COLUMN \"CorrectAnswer\" TEXT NULL;", ct);
+
+            var planColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            using (var command = db.Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = "PRAGMA table_info(\"TeachingPlanItems\");";
+                using var reader = await command.ExecuteReaderAsync(ct);
+                while (await reader.ReadAsync(ct))
+                {
+                    planColumns.Add(reader.GetString(1));
+                }
+            }
+
+            if (!planColumns.Contains("PeriodName"))
+                await db.Database.ExecuteSqlRawAsync("ALTER TABLE \"TeachingPlanItems\" ADD COLUMN \"PeriodName\" TEXT NOT NULL DEFAULT '';", ct);
+            if (!planColumns.Contains("NumberOfPeriods"))
+                await db.Database.ExecuteSqlRawAsync("ALTER TABLE \"TeachingPlanItems\" ADD COLUMN \"NumberOfPeriods\" TEXT NOT NULL DEFAULT '';", ct);
+            if (!planColumns.Contains("Equipment"))
+                await db.Database.ExecuteSqlRawAsync("ALTER TABLE \"TeachingPlanItems\" ADD COLUMN \"Equipment\" TEXT NOT NULL DEFAULT '';", ct);
+            if (!planColumns.Contains("Location"))
+                await db.Database.ExecuteSqlRawAsync("ALTER TABLE \"TeachingPlanItems\" ADD COLUMN \"Location\" TEXT NOT NULL DEFAULT 'Phòng học/Phòng máy';", ct);
         }
         catch
         {

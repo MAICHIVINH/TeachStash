@@ -144,3 +144,87 @@ public class ExamMatrixTemplateSaveRequest
     public string? HeaderExamName { get; set; }
     public string MatrixDataJson { get; set; } = "[]";
 }
+
+public record DocumentBriefDto(int Id, string Title, int DocumentTypeId, string DocumentTypeName, string? Extension, string? RelativePath);
+
+public record TeachingPlanItemDto(
+    int Id,
+    int GradeLevelId,
+    int WeekNumber,
+    int PeriodNumber,
+    string PeriodName,
+    string Title,
+    string NumberOfPeriods,
+    string Equipment,
+    string Location,
+    int? TopicId,
+    string? TopicName,
+    int? LessonId,
+    string? LessonName,
+    string Notes,
+    int SortOrder,
+    DateTime CreatedAt,
+    DateTime UpdatedAt);
+
+public class TeachingPlanItemSaveRequest
+{
+    public int GradeLevelId { get; set; }
+    public int WeekNumber { get; set; }
+    public int PeriodNumber { get; set; }
+    public string? PeriodName { get; set; }
+    public string Title { get; set; } = "";
+    public string? NumberOfPeriods { get; set; }
+    public string? Equipment { get; set; }
+    public string? Location { get; set; }
+    public int? TopicId { get; set; }
+    public int? LessonId { get; set; }
+    public string? Notes { get; set; }
+    public string? Note { get => Notes; set => Notes = value; }
+    public int SortOrder { get; set; }
+}
+
+public record TeachingClassDto(
+    int Id,
+    string Name,
+    int GradeLevelId,
+    string AcademicYear,
+    int SortOrder,
+    int TotalPeriods,
+    int TaughtPeriods,
+    double PercentCompleted);
+
+public class TeachingClassSaveRequest
+{
+    public string Name { get; set; } = "";
+    public int GradeLevelId { get; set; }
+    public string? AcademicYear { get; set; }
+    public int SortOrder { get; set; }
+}
+
+public record TeachingScheduleItemDto(
+    int PlanItemId,
+    int WeekNumber,
+    int PeriodNumber,
+    string PeriodName,
+    string Title,
+    string NumberOfPeriods,
+    string Equipment,
+    string Location,
+    string? PlanNote,
+    int? TopicId,
+    string? TopicName,
+    int? LessonId,
+    string? LessonName,
+    int Status,
+    DateTime? ActualDate,
+    string TeacherNotes,
+    IReadOnlyList<DocumentBriefDto> LinkedDocuments,
+    IReadOnlyList<int> CustomDocIds);
+
+public class UpdateProgressRequest
+{
+    public int Status { get; set; }
+    public DateTime? ActualDate { get; set; }
+    public string? TeacherNotes { get; set; }
+    public List<int>? CustomDocIds { get; set; }
+}

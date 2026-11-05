@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { BookOpen, ClipboardCheck, Code2, DatabaseBackup, FileText, FolderOpen, GraduationCap, History, LayoutDashboard, Library, ListChecks, Lock, Moon, Presentation, Search, Settings, Shuffle, Sun, Trash2, X, type LucideIcon } from 'lucide-react'
+import { BookOpen, CalendarCheck, ClipboardCheck, Code2, DatabaseBackup, FileText, FolderOpen, GraduationCap, History, LayoutDashboard, Library, ListChecks, Lock, Moon, PanelLeftClose, PanelLeftOpen, Presentation, Search, Settings, Shuffle, Sun, Trash2, X, type LucideIcon } from 'lucide-react'
 import { useApp } from '../stores/appStore'
 import { api } from '../services/api'
 import { cx } from '../components/ui'
@@ -28,6 +28,11 @@ function saveStoredHistory(history: string[]) {
 interface NavItem { to: string; label: string; icon: LucideIcon; exact?: boolean; type?: string }
 const groups: { title: string; items: NavItem[] }[] = [
   { title: 'TỔNG QUAN', items: [{ to: '/', label: 'Dashboard', icon: LayoutDashboard, exact: true }] },
+  {
+    title: 'KẾ HOẠCH & TIẾN ĐỘ', items: [
+      { to: '/teaching-plan', label: 'Kế hoạch dạy học (PPCT)', icon: CalendarCheck, exact: true },
+    ]
+  },
   {
     title: 'QUẢN LÝ TÀI LIỆU', items: [
       { to: '/documents', label: 'Tất cả tài liệu', icon: FolderOpen, exact: true },
@@ -63,6 +68,23 @@ export default function MainLayout({ onLock }: { onLock: () => void }) {
   const [history, setHistory] = useState<string[]>(getStoredHistory)
   const [showHistory, setShowHistory] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('teachstash_sidebar_collapsed') === 'true'
+    } catch {
+      return false
+    }
+  })
+
+  const toggleSidebar = () => {
+    setCollapsed(prev => {
+      const next = !prev
+      try {
+        localStorage.setItem('teachstash_sidebar_collapsed', String(next))
+      } catch { /* ignore */ }
+      return next
+    })
+  }
 
   useEffect(() => { if (!loc.pathname.startsWith('/search')) setQ('') }, [loc.pathname])
   const curType = loc.pathname === '/documents' ? params.get('type') : null
@@ -117,40 +139,90 @@ export default function MainLayout({ onLock }: { onLock: () => void }) {
 
   return (
     <div className="flex h-full">
-      <aside className="flex w-60 shrink-0 flex-col overflow-y-auto border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex items-center gap-2.5 px-4 py-4">
-          <img src="/app-icon.png" alt="TeachStash" className="h-7 w-7 rounded-lg shadow-sm" />
-          <div className="leading-tight">
-            <span className="text-sm font-extrabold tracking-wide text-indigo-700 dark:text-indigo-300">TEACHSTASH</span>
-            <div className="text-[10px] font-medium text-slate-400">Kho giáo án Tin học</div>
+      <aside
+        className={cx(
+          'flex shrink-0 flex-col border-r border-slate-200 bg-white transition-[width] duration-200 ease-in-out dark:border-slate-800 dark:bg-slate-900',
+          collapsed ? 'w-16' : 'w-60'
+        )}
+      >
+        <div className={cx(
+          'flex items-center border-b border-slate-100 py-3.5 dark:border-slate-800',
+          collapsed ? 'flex-col gap-2 px-2' : 'justify-between px-3.5'
+        )}>
+          <div className="flex items-center gap-2.5 overflow-hidden min-w-0">
+            <img src="/app-icon.png" alt="TeachStash" className="h-7 w-7 shrink-0 rounded-lg shadow-sm" />
+            {!collapsed && (
+              <div className="leading-tight truncate">
+                <span className="text-sm font-extrabold tracking-wide text-indigo-700 dark:text-indigo-300">TEACHSTASH</span>
+                <div className="text-[10px] font-medium text-slate-400 truncate">Kho giáo án Tin học</div>
+              </div>
+            )}
           </div>
+
         </div>
-        <nav className="flex-1 px-2 pb-4">
-          {groups.map(g => (
+
+        <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3">
+          {groups.map((g, gIdx) => (
             <div key={g.title} className="mb-3">
-              <div className="px-3 pb-1 pt-2 text-[11px] font-semibold tracking-wider text-slate-400">{g.title}</div>
+              {collapsed ? (
+                gIdx > 0 && <div className="my-2 border-t border-slate-100 dark:border-slate-800" />
+              ) : (
+                <div className="px-3 pb-1 pt-1 text-[11px] font-semibold tracking-wider text-slate-400 uppercase truncate">
+                  {g.title}
+                </div>
+              )}
               {g.items.map(it => {
                 const Icon = it.icon
                 const isDoc = it.to.startsWith('/documents')
                 const active = isDoc ? loc.pathname === '/documents' && (curType ?? '') === (it.type ?? '') : undefined
                 return (
-                  <NavLink key={it.to} to={it.to} end={!!it.exact}
-                    className={({ isActive }) => cx('mb-0.5 flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition',
-                      (active ?? isActive) ? 'bg-indigo-50 font-semibold text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800')}>
-                    <Icon className="h-4 w-4" />{it.label}
+                  <NavLink
+                    key={it.to}
+                    to={it.to}
+                    end={!!it.exact}
+                    title={collapsed ? it.label : undefined}
+                    className={({ isActive }) =>
+                      cx(
+                        'mb-0.5 flex items-center rounded-lg text-sm transition',
+                        collapsed
+                          ? 'justify-center p-2.5'
+                          : 'gap-2.5 px-3 py-2',
+                        (active ?? isActive)
+                          ? 'bg-indigo-50 font-semibold text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300'
+                          : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+                      )
+                    }
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    {!collapsed && <span className="truncate">{it.label}</span>}
                   </NavLink>
                 )
               })}
             </div>
           ))}
         </nav>
+
         <div className="border-t border-slate-100 px-2 py-3 text-center text-[11px] leading-relaxed text-slate-400 dark:border-slate-800/80 dark:text-slate-500">
-          <div className="font-medium text-slate-500 dark:text-slate-400">Phiên bản 1.0.0</div>
-          <div>@2026 - Phát triển bởi Mai Chí Vĩnh</div>
+          {collapsed ? (
+            <span className="font-semibold text-slate-400" title="TeachStash v1.0.0 - Mai Chí Vĩnh">v1.0</span>
+          ) : (
+            <>
+              <div className="font-medium text-slate-500 dark:text-slate-400">Phiên bản 1.0.0</div>
+              <div className="truncate">@2026 - Mai Chí Vĩnh</div>
+            </>
+          )}
         </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center gap-3 border-b border-slate-200 bg-white px-5 py-2.5 dark:border-slate-800 dark:bg-slate-900">
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            title={collapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn thanh điều hướng'}
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300 transition shrink-0"
+          >
+            {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+          </button>
           <form
             ref={formRef}
             className="relative max-w-xl flex-1"

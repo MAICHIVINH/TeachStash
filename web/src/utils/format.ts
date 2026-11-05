@@ -31,3 +31,46 @@ export const EXT_LANG: Record<string, string> = {
   py: 'python', cpp: 'cpp', c: 'cpp', h: 'cpp', hpp: 'cpp', cs: 'csharp', java: 'java', js: 'javascript',
   html: 'xml', css: 'css', sql: 'sql', pas: 'delphi', json: 'json', md: 'plaintext', txt: 'plaintext', csv: 'plaintext',
 }
+
+export function parsePeriods(str?: string | null): { lt: number; th: number; total: number } {
+  if (!str) return { lt: 0, th: 0, total: 0 }
+  const clean = str.trim().toUpperCase()
+
+  let lt = 0
+  let th = 0
+
+  // Match LT parts: e.g. "1LT", "2 LT"
+  const ltMatches = clean.match(/(\d+(?:\.\d+)?)\s*LT/g)
+  if (ltMatches) {
+    for (const m of ltMatches) {
+      const val = parseFloat(m)
+      if (!isNaN(val)) lt += val
+    }
+  }
+
+  // Match TH parts: e.g. "1TH", "2 TH"
+  const thMatches = clean.match(/(\d+(?:\.\d+)?)\s*TH/g)
+  if (thMatches) {
+    for (const m of thMatches) {
+      const val = parseFloat(m)
+      if (!isNaN(val)) th += val
+    }
+  }
+
+  // Fallback nếu không có ký hiệu LT/TH rõ ràng
+  if (!ltMatches && !thMatches) {
+    const num = parseFloat(clean)
+    if (!isNaN(num)) {
+      if (clean.includes('TH')) th = num
+      else lt = num
+    }
+  }
+
+  return { lt, th, total: lt + th }
+}
+
+export function formatPeriodsSummary(lt: number, th: number): string {
+  const total = lt + th
+  if (total <= 0) return ''
+  return ` (${total} tiết: ${lt}LT+${th}TH)`
+}

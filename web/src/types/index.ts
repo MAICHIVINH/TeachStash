@@ -114,3 +114,98 @@ export interface GoogleDriveSyncSettings {
   autoUpload: boolean
   maxBackups: number
 }
+
+// ---------- Kế hoạch dạy học (PPCT) ----------
+export type TeachingStatus = 0 | 1 | 2 | 3 // 0: Chưa dạy, 1: Đã dạy, 2: Cần điều chỉnh/Nghỉ, 3: Dạy bù
+
+export interface DocumentBrief {
+  id: number
+  title: string
+  documentTypeId: number
+  documentTypeName: string
+  file: FileInfo | null
+}
+
+export interface TeachingPlanItem {
+  id: number
+  gradeLevelId: number
+  gradeLevelName?: string
+  weekNumber: number
+  periodNumber: number
+  periodName?: string
+  title: string
+  numberOfPeriods?: string
+  equipment?: string
+  location?: string
+  topicId: number | null
+  topicName: string | null
+  lessonId: number | null
+  lessonName: string | null
+  note: string | null
+  sortOrder: number
+}
+
+export interface TeachingPlanItemSave {
+  gradeLevelId: number
+  weekNumber: number
+  periodNumber: number
+  periodName?: string
+  title: string
+  numberOfPeriods?: string
+  equipment?: string
+  location?: string
+  topicId?: number | null
+  lessonId?: number | null
+  note?: string | null
+  notes?: string | null
+  sortOrder?: number
+}
+
+export interface TeachingClass {
+  id: number
+  name: string
+  gradeLevelId: number
+  gradeLevelName?: string
+  schoolYear: string
+  sortOrder: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface TeachingClassSave {
+  name: string
+  gradeLevelId: number
+  schoolYear: string
+  sortOrder?: number
+}
+
+export interface TeachingScheduleItem {
+  planItemId: number
+  gradeLevelId?: number
+  weekNumber: number
+  periodNumber: number
+  periodName?: string
+  title: string
+  numberOfPeriods?: string
+  equipment?: string
+  location?: string
+  planNote?: string | null
+  topicId: number | null
+  topicName: string | null
+  lessonId: number | null
+  lessonName: string | null
+  status: TeachingStatus
+  actualDate: string | null
+  teacherNotes?: string | null
+  progressNote?: string | null
+  teachingClassId?: number
+  linkedDocuments: DocumentBrief[]
+  customDocIds?: number[]
+}
+
+export interface UpdateProgressRequest {
+  status: number
+  actualDate?: string | null
+  teacherNotes?: string | null
+  customDocIds?: number[]
+}

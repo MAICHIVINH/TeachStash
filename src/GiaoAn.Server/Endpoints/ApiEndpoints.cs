@@ -23,6 +23,8 @@ public static class ApiEndpoints
         MapExamMatrixTemplates(api);
         MapSnippets(api);
         MapMisc(api);
+        MapTeachingPlans(api);
+        MapTeachingClasses(api);
         MapBackups(api);
         MapGoogleDrive(api);
     }
@@ -192,6 +194,48 @@ public static class ApiEndpoints
         api.MapGet("/settings", async (ISettingsService s, CancellationToken ct) => Results.Ok(await s.GetAllAsync(ct)));
         api.MapPut("/settings", async (SettingsUpdateRequest r, ISettingsService s, CancellationToken ct) => Results.Ok(await s.UpdateAsync(r, ct)));
         api.MapPost("/maintenance/clean-orphans", async (IDocumentService s, CancellationToken ct) => Results.Ok(await s.CleanOrphanFilesAsync(ct)));
+    }
+
+    // ---------- Kế hoạch dạy học (PPCT) ----------
+    private static void MapTeachingPlans(RouteGroupBuilder api)
+    {
+        var g = api.MapGroup("/teaching-plan");
+        g.MapGet("", async (int? gradeLevelId, ITeachingPlanService s, CancellationToken ct) =>
+            Results.Ok(await s.GetPlanItemsAsync(gradeLevelId, ct)));
+        g.MapPost("/generate-from-lessons", async (int gradeLevelId, ITeachingPlanService s, CancellationToken ct) =>
+            Results.Ok(await s.GenerateFromLessonsAsync(gradeLevelId, ct)));
+        g.MapPost("/item", async (TeachingPlanItemSaveRequest r, ITeachingPlanService s, CancellationToken ct) =>
+            Results.Ok(await s.SavePlanItemAsync(null, r, ct)));
+        g.MapPut("/item/{id:int}", async (int id, TeachingPlanItemSaveRequest r, ITeachingPlanService s, CancellationToken ct) =>
+            Results.Ok(await s.SavePlanItemAsync(id, r, ct)));
+        g.MapDelete("/item/{id:int}", async (int id, ITeachingPlanService s, CancellationToken ct) =>
+        {
+            await s.DeletePlanItemAsync(id, ct);
+            return Results.NoContent();
+        });
+    }
+
+    // ---------- Lớp học & Tiến độ giảng dạy ----------
+    private static void MapTeachingClasses(RouteGroupBuilder api)
+    {
+        var g = api.MapGroup("/teaching-classes");
+        g.MapGet("", async (int? gradeLevelId, ITeachingPlanService s, CancellationToken ct) =>
+            Results.Ok(await s.GetClassesAsync(gradeLevelId, ct)));
+        g.MapPost("", async (TeachingClassSaveRequest r, ITeachingPlanService s, CancellationToken ct) =>
+            Results.Ok(await s.SaveClassAsync(null, r, ct)));
+        g.MapPut("/{id:int}", async (int id, TeachingClassSaveRequest r, ITeachingPlanService s, CancellationToken ct) =>
+            Results.Ok(await s.SaveClassAsync(id, r, ct)));
+        g.MapDelete("/{id:int}", async (int id, ITeachingPlanService s, CancellationToken ct) =>
+        {
+            await s.DeleteClassAsync(id, ct);
+            return Results.NoContent();
+        });
+        g.MapGet("/{classId:int}/schedule", async (int classId, ITeachingPlanService s, CancellationToken ct) =>
+            Results.Ok(await s.GetClassScheduleAsync(classId, ct)));
+        g.MapPost("/{classId:int}/toggle-status/{planItemId:int}", async (int classId, int planItemId, ITeachingPlanService s, CancellationToken ct) =>
+            Results.Ok(await s.ToggleStatusAsync(classId, planItemId, ct)));
+        g.MapPut("/{classId:int}/progress/{planItemId:int}", async (int classId, int planItemId, UpdateProgressRequest r, ITeachingPlanService s, CancellationToken ct) =>
+            Results.Ok(await s.UpdateProgressAsync(classId, planItemId, r, ct)));
     }
 
     // ---------- Sao lưu / phục hồi ----------

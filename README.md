@@ -11,7 +11,28 @@
 
 ## 🌟 Các tính năng chính (Key Features)
 
-### 1. Trộn đề & Tạo đề kiểm tra tự động theo Ma trận GDPT 2018 (Mới ⭐)
+### 1. Kế hoạch giảng dạy & Phân phối chương trình (PPCT Planner) (Mới ⭐)
+- **Tiến độ chuẩn 35 tuần chuẩn mẫu Công văn 5512 (Phụ lục 3):**
+  - Bảng theo dõi trực quan đúng cấu trúc chuẩn của Bộ GD&ĐT: **STT $\rightarrow$ PPCT $\rightarrow$ Bài học $\rightarrow$ Số tiết $\rightarrow$ Tuần $\rightarrow$ Thiết bị dạy học $\rightarrow$ Địa điểm dạy học $\rightarrow$ Trạng thái $\rightarrow$ Ngày dạy $\rightarrow$ Tài liệu gắn kèm $\rightarrow$ Ghi chú**.
+  - **Tự động gom nhóm chuyên nghiệp:** Phân nhóm theo **Học kỳ (Học kỳ 1 / Học kỳ 2)** và **Chủ đề** kèm tự động tính tổng số tiết lý thuyết + thực hành (ví dụ: `CHỦ ĐỀ 1. MÁY TÍNH VÀ XÃ HỘI TRI THỨC (10 tiết: 8LT+2TH)`).
+  - **Khởi tạo siêu tốc 1-click:** Nút *"Khởi tạo nhanh từ bài học"* tự động quét danh mục bài học Tin học của khối để tạo đầy đủ 35 tuần giảng dạy theo phân phối chương trình kèm thiết bị và địa điểm dạy học chuẩn, giáo viên không cần gõ tay thủ công từng tiết.
+  - **Xuất file Word (.docx) chuẩn mẫu Công văn 5512:** Nhấn nút *"Xuất Word (CV 5512)"* để xuất trọn vẹn Kế hoạch dạy học của tổ chuyên môn ra file Word khổ ngang A4, chuẩn phông Times New Roman kèm phần ký tên của Tổ trưởng chuyên môn và Giáo viên để in ấn hoặc nộp cho Ban giám hiệu.
+  - Cho phép tùy biến, thêm tiết dạy mới, sửa tên bài, số tiết (2LT, 2TH), thiết bị, địa điểm dạy học hoặc ghi chú riêng cho từng tiết trong khung chuẩn.
+- **Theo dõi tiến độ chi tiết theo từng Lớp học:**
+  - Hệ thống tab chuyển đổi linh hoạt giữa các lớp (ví dụ: `11A1`, `11A2`, `11A5`...).
+  - Quản lý thêm lớp, sửa tên lớp, phân chia năm học độc lập. Khung PPCT chuẩn của khối dùng chung, nhưng tiến độ bài dạy và ngày thực dạy được lưu riêng biệt cho từng lớp.
+- **Đánh dấu trạng thái 1 chạm (1-touch Toggle):**
+  - Chuyển đổi nhanh 1-chạm giữa các trạng thái: **Đã dạy** (xanh lục với dấu kiểm), **Chưa dạy** (xám), **Nghỉ / Hoãn** (vàng cam), **Dạy bù** (xanh dương).
+  - Tự động điền ngày dạy thực tế khi giáo viên đánh dấu *"Đã dạy"*.
+- **Thanh tiến độ & Thống kê trực quan (Progress Banner):**
+  - Hiển thị tỷ lệ hoàn thành theo thời gian thực (ví dụ: `Đã dạy 18/35 tiết (51.4%)`).
+  - Đếm chi tiết số tiết đã dạy, chưa dạy, số tiết nghỉ/hoãn cần dạy bù.
+  - Bộ lọc học kỳ tiện lợi: **Cả năm (35 tuần)**, **Học kỳ 1 (Tuần 1–18)**, **Học kỳ 2 (Tuần 19–35)** hoặc lọc theo từng trạng thái bài dạy.
+- **Gắn nhanh tài liệu & Xem trước 1-click (Instant Document Preview):**
+  - Hệ thống tự động nhận diện và hiển thị các huy hiệu tài liệu gắn kèm theo bài học: **Giáo án (KHBD)** (xanh dương), **Bài giảng trình chiếu (PPTX)** (cam), **Phiếu học tập / Bài tập** (tím).
+  - Nhấp trực tiếp vào huy hiệu tài liệu để mở ngay hộp thoại xem trước (Preview Modal), đọc nội dung tệp hoặc mở bằng ứng dụng trên máy mà không cần rời khỏi bảng kế hoạch.
+
+### 2. Trộn đề & Tạo đề kiểm tra tự động theo Ma trận GDPT 2018 (Mới ⭐)
 - **Quy trình 3 bước (Wizard) tinh gọn & chuyên nghiệp:**
   - **Bước 1: Thiết lập đề thi & Ma trận phân bổ:**
     - Cấu hình tiêu đề chuẩn: Tên trường/đơn vị, tên kỳ thi, khối lớp, môn học, thời gian làm bài.

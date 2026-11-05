@@ -127,3 +127,36 @@ public class ExamMatrixTemplateConfiguration : IEntityTypeConfiguration<ExamMatr
         b.HasOne(x => x.GradeLevel).WithMany().HasForeignKey(x => x.GradeLevelId).OnDelete(DeleteBehavior.SetNull);
     }
 }
+
+public class TeachingPlanItemConfiguration : IEntityTypeConfiguration<TeachingPlanItem>
+{
+    public void Configure(EntityTypeBuilder<TeachingPlanItem> b)
+    {
+        b.Property(x => x.Title).HasMaxLength(300).IsRequired();
+        b.HasOne(x => x.GradeLevel).WithMany().HasForeignKey(x => x.GradeLevelId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne(x => x.Topic).WithMany().HasForeignKey(x => x.TopicId).OnDelete(DeleteBehavior.SetNull);
+        b.HasOne(x => x.Lesson).WithMany().HasForeignKey(x => x.LessonId).OnDelete(DeleteBehavior.SetNull);
+        b.HasIndex(x => new { x.GradeLevelId, x.WeekNumber, x.PeriodNumber });
+    }
+}
+
+public class TeachingClassConfiguration : IEntityTypeConfiguration<TeachingClass>
+{
+    public void Configure(EntityTypeBuilder<TeachingClass> b)
+    {
+        b.Property(x => x.Name).HasMaxLength(100).IsRequired();
+        b.Property(x => x.AcademicYear).HasMaxLength(50).IsRequired();
+        b.HasOne(x => x.GradeLevel).WithMany().HasForeignKey(x => x.GradeLevelId).OnDelete(DeleteBehavior.Cascade);
+        b.HasIndex(x => new { x.GradeLevelId, x.Name, x.AcademicYear }).IsUnique();
+    }
+}
+
+public class TeachingProgressConfiguration : IEntityTypeConfiguration<TeachingProgress>
+{
+    public void Configure(EntityTypeBuilder<TeachingProgress> b)
+    {
+        b.HasOne(x => x.Class).WithMany().HasForeignKey(x => x.ClassId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne(x => x.PlanItem).WithMany().HasForeignKey(x => x.PlanItemId).OnDelete(DeleteBehavior.Cascade);
+        b.HasIndex(x => new { x.ClassId, x.PlanItemId }).IsUnique();
+    }
+}

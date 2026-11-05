@@ -10,4 +10,6 @@ public enum Difficulty { Recognize = 1, Understand = 2, Apply = 3, AdvancedApply
 
 public enum ExerciseType { MultipleChoice = 1, EssayOrCoding = 2 }
 
+public enum TeachingStatus { Untaught = 0, Taught = 1, NeedsAdjustment = 2, Compensated = 3 }
+
 public enum BackupKind { Backup = 1, Restore = 2 }

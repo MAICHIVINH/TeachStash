@@ -21,6 +21,9 @@ public interface IAppDbContext
     DbSet<CodeSnippet> CodeSnippets { get; }
     DbSet<Exercise> Exercises { get; }
     DbSet<ExamMatrixTemplate> ExamMatrixTemplates { get; }
+    DbSet<TeachingPlanItem> TeachingPlanItems { get; }
+    DbSet<TeachingClass> TeachingClasses { get; }
+    DbSet<TeachingProgress> TeachingProgresses { get; }
     DbSet<AppSetting> AppSettings { get; }
     DbSet<BackupHistory> BackupHistories { get; }
     DatabaseFacade Database { get; }
@@ -168,4 +171,23 @@ public interface IGoogleDriveService
     Task<string> UploadBackupAsync(string zipPath, CancellationToken ct = default);
     Task<IReadOnlyList<GoogleDriveFileDto>> ListBackupsAsync(CancellationToken ct = default);
     Task<string> DownloadBackupAsync(string fileId, CancellationToken ct = default);
+}
+
+public interface ITeachingPlanService
+{
+    // Khung PPCT
+    Task<IReadOnlyList<TeachingPlanItemDto>> GetPlanItemsAsync(int? gradeLevelId, CancellationToken ct);
+    Task<int> GenerateFromLessonsAsync(int gradeLevelId, CancellationToken ct);
+    Task<TeachingPlanItemDto> SavePlanItemAsync(int? id, TeachingPlanItemSaveRequest req, CancellationToken ct);
+    Task DeletePlanItemAsync(int id, CancellationToken ct);
+
+    // Lớp học
+    Task<IReadOnlyList<TeachingClassDto>> GetClassesAsync(int? gradeLevelId, CancellationToken ct);
+    Task<TeachingClassDto> SaveClassAsync(int? id, TeachingClassSaveRequest req, CancellationToken ct);
+    Task DeleteClassAsync(int id, CancellationToken ct);
+
+    // Tiến độ giảng dạy theo lớp
+    Task<IReadOnlyList<TeachingScheduleItemDto>> GetClassScheduleAsync(int classId, CancellationToken ct);
+    Task<TeachingScheduleItemDto> ToggleStatusAsync(int classId, int planItemId, CancellationToken ct);
+    Task<TeachingScheduleItemDto> UpdateProgressAsync(int classId, int planItemId, UpdateProgressRequest req, CancellationToken ct);
 }

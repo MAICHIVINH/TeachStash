@@ -126,6 +126,51 @@ public class ExamMatrixTemplate : Entity
     public DateTime UpdatedAt { get; set; }
 }
 
+public class TeachingPlanItem : Entity
+{
+    public int GradeLevelId { get; set; }
+    public GradeLevel? GradeLevel { get; set; }
+    public int WeekNumber { get; set; }
+    public int PeriodNumber { get; set; }
+    public string PeriodName { get; set; } = "";
+    public string Title { get; set; } = "";
+    public string NumberOfPeriods { get; set; } = "2LT";
+    public string Equipment { get; set; } = "";
+    public string Location { get; set; } = "Phòng học/Phòng máy";
+    public int? TopicId { get; set; }
+    public Topic? Topic { get; set; }
+    public int? LessonId { get; set; }
+    public Lesson? Lesson { get; set; }
+    public string Notes { get; set; } = "";
+    public int SortOrder { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+}
+
+public class TeachingClass : Entity
+{
+    public string Name { get; set; } = "";
+    public int GradeLevelId { get; set; }
+    public GradeLevel? GradeLevel { get; set; }
+    public string AcademicYear { get; set; } = "2026-2027";
+    public int SortOrder { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+}
+
+public class TeachingProgress : Entity
+{
+    public int ClassId { get; set; }
+    public TeachingClass? Class { get; set; }
+    public int PlanItemId { get; set; }
+    public TeachingPlanItem? PlanItem { get; set; }
+    public TeachingStatus Status { get; set; } = TeachingStatus.Untaught;
+    public DateTime? ActualDate { get; set; }
+    public string TeacherNotes { get; set; } = "";
+    public string CustomDocumentIdsJson { get; set; } = "[]";
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+}
+
 public class AppSetting { public string Key { get; set; } = ""; public string Value { get; set; } = ""; }
 
 public class BackupHistory

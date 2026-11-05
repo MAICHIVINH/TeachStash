@@ -91,6 +91,28 @@ export const api = {
   deleteExamMatrixTemplate: (id: number) =>
     request<void>('DELETE', `/api/exam-matrix-templates/${id}`),
 
+  teachingPlans: (gradeLevelId?: number | null) =>
+    request<T.TeachingPlanItem[]>('GET', '/api/teaching-plan' + qs({ gradeLevelId })),
+  generateTeachingPlanFromLessons: (gradeLevelId: number) =>
+    request<{ count: number }>('POST', `/api/teaching-plan/generate-from-lessons?gradeLevelId=${gradeLevelId}`),
+  saveTeachingPlanItem: (id: number | null, b: T.TeachingPlanItemSave) =>
+    id ? request<T.TeachingPlanItem>('PUT', `/api/teaching-plan/item/${id}`, b) : request<T.TeachingPlanItem>('POST', '/api/teaching-plan/item', b),
+  deleteTeachingPlanItem: (id: number) =>
+    request<void>('DELETE', `/api/teaching-plan/item/${id}`),
+
+  teachingClasses: (gradeLevelId?: number | null) =>
+    request<T.TeachingClass[]>('GET', '/api/teaching-classes' + qs({ gradeLevelId })),
+  saveTeachingClass: (id: number | null, b: T.TeachingClassSave) =>
+    id ? request<T.TeachingClass>('PUT', `/api/teaching-classes/${id}`, b) : request<T.TeachingClass>('POST', '/api/teaching-classes', b),
+  deleteTeachingClass: (id: number) =>
+    request<void>('DELETE', `/api/teaching-classes/${id}`),
+  classSchedule: (classId: number) =>
+    request<T.TeachingScheduleItem[]>('GET', `/api/teaching-classes/${classId}/schedule`),
+  toggleClassStatus: (classId: number, planItemId: number) =>
+    request<T.TeachingScheduleItem>('POST', `/api/teaching-classes/${classId}/toggle-status/${planItemId}`),
+  updateClassProgress: (classId: number, planItemId: number, b: T.UpdateProgressRequest) =>
+    request<T.TeachingScheduleItem>('PUT', `/api/teaching-classes/${classId}/progress/${planItemId}`, b),
+
   snippets: (f: Record<string, unknown>) => request<T.Paged<T.Snippet>>('GET', '/api/snippets' + qs(f)),
   saveSnippet: (id: number | null, b: T.SnippetSave) =>
     id ? request<T.Snippet>('PUT', `/api/snippets/${id}`, b) : request<T.Snippet>('POST', '/api/snippets', b),
