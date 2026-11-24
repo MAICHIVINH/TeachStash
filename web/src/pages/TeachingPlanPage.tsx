@@ -660,7 +660,6 @@ export default function TeachingPlanPage() {
 
           <Button
             variant="ghost"
-            size="sm"
             onClick={() => {
               setEditingClass(null)
               setClassNameInput('')

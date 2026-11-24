@@ -78,7 +78,6 @@ export function WorksheetExportModal({ exercises, onClose }: WorksheetExportModa
     <Modal
       title="Xuất phiếu bài tập / Phiếu học tập ra Word (.docx)"
       onRequestClose={onClose}
-      wide="lg"
       footer={
         <div className="flex items-center justify-between w-full">
           <div className="text-xs text-slate-500">

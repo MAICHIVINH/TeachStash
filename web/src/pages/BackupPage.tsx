@@ -131,7 +131,7 @@ export default function BackupPage() {
   }
 
   const finishRestore = async () => {
-    await refreshLookups().catch(() => {})
+    await refreshLookups().catch(() => { })
     toast('success', 'Phục hồi thành công. Toàn bộ dữ liệu đã được nạp lại.')
     setCheck(null)
     setDriveRestoreCheck(null)
@@ -427,11 +427,11 @@ export default function BackupPage() {
           <div className="flex items-center gap-2 shrink-0">
             {driveStatus?.isConnected ? (
               <>
-                <Button size="sm" variant="secondary" onClick={loadDrive} loading={driveLoading}>
+                <Button variant="secondary" onClick={loadDrive} loading={driveLoading}>
                   <RefreshCw className="h-3.5 w-3.5" />
                   Làm mới
                 </Button>
-                <Button size="sm" variant="danger" onClick={handleDisconnectDrive}>
+                <Button variant="danger" onClick={handleDisconnectDrive}>
                   <LogOut className="h-3.5 w-3.5" />
                   Ngắt kết nối
                 </Button>
@@ -593,11 +593,10 @@ export default function BackupPage() {
             {/* Hộp kiểm tra file ZIP cục bộ */}
             {check && (
               <div
-                className={`mt-4 rounded-lg border p-4 text-xs transition ${
-                  check.result.valid
+                className={`mt-4 rounded-lg border p-4 text-xs transition ${check.result.valid
                     ? 'border-emerald-200 bg-emerald-50/70 text-emerald-900 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-200'
                     : 'border-rose-200 bg-rose-50/70 text-rose-900 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200'
-                }`}
+                  }`}
               >
                 <div className="flex items-start gap-2.5">
                   {check.result.valid ? (
@@ -713,11 +712,10 @@ export default function BackupPage() {
           {/* Modal xác nhận phục hồi từ Drive */}
           {driveRestoreCheck && (
             <div
-              className={`mt-4 rounded-lg border p-4 text-xs transition ${
-                driveRestoreCheck.result.valid
+              className={`mt-4 rounded-lg border p-4 text-xs transition ${driveRestoreCheck.result.valid
                   ? 'border-emerald-200 bg-emerald-50/70 text-emerald-900 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-200'
                   : 'border-rose-200 bg-rose-50/70 text-rose-900 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200'
-              }`}
+                }`}
             >
               <div className="flex items-start gap-2.5">
                 {driveRestoreCheck.result.valid ? (
@@ -761,7 +759,9 @@ export default function BackupPage() {
             <h2 className="font-semibold text-slate-800 dark:text-slate-100">Lịch sử sao lưu & phục hồi cục bộ</h2>
             {history && <Badge>{history.length}</Badge>}
           </div>
-          <Button size="sm" variant="ghost" onClick={load}>Làm mới</Button>
+          <Button size="sm" variant="ghost" onClick={load}>
+            <RefreshCw className="h-3.5 w-3.5" />
+            Làm mới</Button>
         </div>
 
         {!history ? (
@@ -788,11 +788,10 @@ export default function BackupPage() {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${
-                          h.kind === 'Backup'
+                        className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${h.kind === 'Backup'
                             ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300'
                             : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
-                        }`}
+                          }`}
                       >
                         {h.kind === 'Backup' ? <DatabaseBackup className="h-3 w-3" /> : <RotateCcw className="h-3 w-3" />}
                         {h.kind === 'Backup' ? 'Sao lưu' : 'Phục hồi'}
@@ -801,9 +800,8 @@ export default function BackupPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`inline-block h-2 w-2 rounded-full shrink-0 ${
-                            h.success ? 'bg-emerald-500' : 'bg-rose-500'
-                          }`}
+                          className={`inline-block h-2 w-2 rounded-full shrink-0 ${h.success ? 'bg-emerald-500' : 'bg-rose-500'
+                            }`}
                         />
                         <span className="text-xs selectable text-slate-700 dark:text-slate-200" title={h.filePath}>
                           {h.success ? 'Thành công' : 'Thất bại'} &mdash; {h.message}
@@ -829,7 +827,10 @@ export default function BackupPage() {
                         )}
                         {h.success && h.kind === 'Backup' && (
                           <a href={api.backupDownloadUrl(h.id)} download>
-                            <Button size="sm">
+                            <Button
+                              size="sm"
+                              variant="primary"
+                            >
                               <Download className="h-3.5 w-3.5" />
                               Tải về
                             </Button>

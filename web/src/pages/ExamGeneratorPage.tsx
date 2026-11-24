@@ -409,11 +409,11 @@ export default function ExamGeneratorPage() {
                 1. Thông tin Tiêu đề & Cấu hình Đề thi
               </h2>
               <div className="flex items-center gap-2">
-                <Button size="sm" onClick={() => setShowTemplateModal(true)}>
+                <Button onClick={() => setShowTemplateModal(true)}>
                   <BookOpen className="h-3.5 w-3.5" />
                   Mẫu ma trận ({templates.length})
                 </Button>
-                <Button size="sm" variant="primary" onClick={() => setShowSaveTemplateModal(true)}>
+                <Button variant="primary" onClick={() => setShowSaveTemplateModal(true)}>
                   <Save className="h-3.5 w-3.5" />
                   Lưu ma trận thành mẫu
                 </Button>
@@ -622,7 +622,6 @@ export default function ExamGeneratorPage() {
                 disabled={summary.totalQuestions === 0}
               >
                 Xem trước câu hỏi
-                {/* <ArrowRight className="h-4 w-4" /> */}
               </Button>
             </div>
           </div>

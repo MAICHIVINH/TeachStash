@@ -40,7 +40,7 @@ export default function TrashPage() {
       {data.items.length === 0 ? <EmptyState title="Thùng rác trống" text="Các tài liệu bạn xóa sẽ nằm ở đây cho đến khi bạn xóa vĩnh viễn. Ứng dụng không tự động xóa." /> : (<>
         <DocumentTable items={data.items} dateField="deletedAt" onOpen={() => {}} selected={sel}
           onSelect={(id, v) => setSel(p => { const n = new Set(p); v ? n.add(id) : n.delete(id); return n })}
-          actions={d => <div className="flex justify-end gap-1"><Button size="sm" onClick={() => restore([d.id])}><RotateCcw className="h-3.5 w-3.5" />Khôi phục</Button><Button size="sm" variant="danger" onClick={() => purge([d.id])}><Trash2 className="h-3.5 w-3.5" /></Button></div>} />
+          actions={d => <div className="flex justify-end gap-1"><Button onClick={() => restore([d.id])}><RotateCcw className="h-3.5 w-3.5" />Khôi phục</Button><Button variant="danger" onClick={() => purge([d.id])}><Trash2 className="h-3.5 w-3.5" /></Button></div>} />
         <Pagination page={page} pageSize={50} total={data.total} onChange={setPage} />
       </>)}
     </div>

@@ -412,7 +412,6 @@ Lời giải: ${q.solution}${hintSuffix}`
                 <span className="font-semibold">Chưa có Gemini API Key!</span> Để AI hoạt động, bạn hãy cấu hình API Key miễn phí từ Google AI Studio.
                 <div className="mt-2 flex items-center gap-2">
                   <Button
-                    size="sm"
                     variant="primary"
                     onClick={() => setShowSettingsModal(true)}
                   >
@@ -578,7 +577,6 @@ Lời giải: ${q.solution}${hintSuffix}`
                       </div>
                       <div className="flex items-center gap-1.5">
                         <Button
-                          size="sm"
                           onClick={handleCopyMcqAll}
                           title="Sao chép toàn bộ câu hỏi dạng text"
                         >
@@ -586,7 +584,6 @@ Lời giải: ${q.solution}${hintSuffix}`
                           {copiedMcq ? 'Đã chép' : 'Sao chép tất cả'}
                         </Button>
                         <Button
-                          size="sm"
                           variant="primary"
                           loading={savingExercises}
                           onClick={handleSaveMcqToBank}
@@ -755,7 +752,6 @@ Lời giải: ${q.solution}${hintSuffix}`
                       </div>
                       <div className="flex items-center gap-1.5">
                         <Button
-                          size="sm"
                           onClick={handleCopyTests}
                           title="Sao chép bảng dạng Markdown"
                         >
@@ -763,7 +759,6 @@ Lời giải: ${q.solution}${hintSuffix}`
                           {copiedTests ? 'Đã chép' : 'Sao chép bảng'}
                         </Button>
                         <Button
-                          size="sm"
                           variant="secondary"
                           onClick={handleDownloadTests}
                           title="Tải tệp testcase về máy"
@@ -851,7 +846,7 @@ Lời giải: ${q.solution}${hintSuffix}`
                     <span className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
                       Định dạng chuẩn
                     </span>
-                    <div className="rounded border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs text-slate-600 font-medium dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                    <div className="rounded border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs text-slate-600 font-medium dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                       Công văn 5512/BGDĐT
                     </div>
                   </div>
@@ -889,7 +884,6 @@ Lời giải: ${q.solution}${hintSuffix}`
                         Bản thảo Mục tiêu bài dạy
                       </div>
                       <Button
-                        size="sm"
                         onClick={handleCopyObjectives}
                         title="Sao chép nội dung để dán vào file Word giáo án"
                       >
@@ -1012,7 +1006,6 @@ Lời giải: ${q.solution}${hintSuffix}`
 
                 <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
                   <Button
-                    size="sm"
                     variant="secondary"
                     loading={testingConnection}
                     onClick={handleTestConnection}
@@ -1022,14 +1015,12 @@ Lời giải: ${q.solution}${hintSuffix}`
                   </Button>
                   <div className="flex items-center gap-2">
                     <Button
-                      size="sm"
                       variant="ghost"
                       onClick={() => setShowSettingsModal(false)}
                     >
                       Đóng
                     </Button>
                     <Button
-                      size="sm"
                       variant="primary"
                       loading={savingSettings}
                       onClick={handleSaveSettings}

@@ -147,7 +147,6 @@ function Categories() {
       action={
         <Button
           variant="primary"
-          size="sm"
           onClick={() =>
             setDlg({
               kind: 'topic',
@@ -187,7 +186,6 @@ function Categories() {
                 </div>
                 <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                   <Button
-                    size="sm"
                     variant="secondary"
                     onClick={() =>
                       setDlg({
@@ -245,7 +243,6 @@ function Categories() {
                               </div>
                               <div className="flex items-center gap-1.5">
                                 <Button
-                                  size="sm"
                                   onClick={() =>
                                     setDlg({
                                       kind: 'lesson',
@@ -1065,7 +1062,7 @@ export default function SettingsPage() {
                 Quét và xóa các tệp trong thư mục <code>files/</code> không còn được bất kỳ tài liệu hay bài tập nào tham chiếu.
               </p>
             </div>
-            <Button size="sm" onClick={clean}>
+            <Button onClick={clean}>
               <Trash2 className="h-3.5 w-3.5 text-rose-500" />
               Quét & Dọn tệp mồ côi
             </Button>
