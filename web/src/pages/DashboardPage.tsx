@@ -49,31 +49,136 @@ export default function DashboardPage() {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">Tổng quan</h1>
-        <Button variant="primary" onClick={() => setAdding(true)}><Plus className="h-4 w-4" />Thêm tài liệu</Button>
+        <Button
+          variant="primary"
+          onClick={() => setAdding(true)}
+        >
+          <Plus className="h-4 w-4" />
+          Thêm tài liệu
+        </Button>
       </div>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
-        <Stat label="Tổng số tài liệu" value={data.totalDocuments} icon={FolderOpen} color="bg-indigo-100 text-indigo-600" onClick={() => nav('/documents')} />
-        <Stat label="Giáo án" value={data.lessonPlans} icon={FileText} color="bg-violet-100 text-violet-600" onClick={() => nav('/documents?type=1')} />
-        <Stat label="Bài giảng" value={data.lectures} icon={Presentation} color="bg-sky-100 text-sky-600" onClick={() => nav('/documents?type=2')} />
-        <Stat label="Bài tập" value={data.exercises} icon={ListChecks} color="bg-emerald-100 text-emerald-600" onClick={() => nav('/exercises')} />
-        <Stat label="Đề kiểm tra" value={data.exams} icon={Library} color="bg-amber-100 text-amber-600" onClick={() => nav('/documents?type=4')} />
-        <Stat label="Đoạn mã nguồn" value={data.codeSnippets} icon={Code2} color="bg-rose-100 text-rose-600" onClick={() => nav('/snippets')} />
+        <Stat
+          label="Tổng số tài liệu"
+          value={data.totalDocuments}
+          icon={FolderOpen}
+          color="bg-indigo-100 text-indigo-600"
+          onClick={() => nav('/documents')}
+        />
+        <Stat
+          label="Giáo án"
+          value={data.lessonPlans}
+          icon={FileText}
+          color="bg-violet-100 text-violet-600"
+          onClick={() => nav('/documents?type=1')}
+        />
+        <Stat
+          label="Bài giảng"
+          value={data.lectures}
+          icon={Presentation}
+          color="bg-sky-100 text-sky-600"
+          onClick={() => nav('/documents?type=2')}
+        />
+        <Stat
+          label="Bài tập"
+          value={data.exercises}
+          icon={ListChecks}
+          color="bg-emerald-100 text-emerald-600"
+          onClick={() => nav('/exercises')}
+        />
+        <Stat
+          label="Đề kiểm tra"
+          value={data.exams}
+          icon={Library}
+          color="bg-amber-100 text-amber-600"
+          onClick={() => nav('/documents?type=4')}
+        />
+        <Stat
+          label="Đoạn mã nguồn"
+          value={data.codeSnippets}
+          icon={Code2}
+          color="bg-rose-100 text-rose-600"
+          onClick={() => nav('/snippets')}
+        />
       </div>
       <div className="flex flex-wrap gap-2">
-        <Button onClick={() => setAdding(true)}><Plus className="h-4 w-4" />Tài liệu mới</Button>
-        <Button onClick={() => nav('/exercises?new=1')}><ListChecks className="h-4 w-4" />Bài tập mới</Button>
-        <Button onClick={() => nav('/snippets?new=1')}><Code2 className="h-4 w-4" />Mã nguồn mới</Button>
-        <Button onClick={() => nav('/documents?type=7')}><ClipboardCheck className="h-4 w-4" />Phiếu học tập</Button>
-        <Button onClick={() => nav('/backup')}><DatabaseBackup className="h-4 w-4" />Sao lưu</Button>
+        <Button
+          onClick={() => setAdding(true)}
+        >
+          <Plus className="h-4 w-4" />
+          Tài liệu mới
+        </Button>
+        <Button
+          onClick={() => nav('/exercises?new=1')}
+        >
+          <ListChecks className="h-4 w-4" />
+          Bài tập mới
+        </Button>
+        <Button
+          onClick={() => nav('/snippets?new=1')}
+        >
+          <Code2 className="h-4 w-4" />
+          Mã nguồn mới
+        </Button>
+        <Button
+          onClick={() => nav('/documents?type=7')}
+        >
+          <ClipboardCheck className="h-4 w-4" />
+          Phiếu học tập
+        </Button>
+        <Button
+          onClick={() => nav('/backup')}
+        >
+          <DatabaseBackup className="h-4 w-4" />
+          Sao lưu
+        </Button>
       </div>
-      {empty ? <EmptyState title="Kho giáo án đang trống" text="Hãy thêm tài liệu, bài tập hoặc đoạn mã đầu tiên." action={<Button variant="primary" onClick={() => setAdding(true)}><Plus className="h-4 w-4" />Thêm tài liệu đầu tiên</Button>} /> : (
-        <div className="grid gap-4 xl:grid-cols-3">
-          <RecentList title="Mới thêm gần đây" icon={Plus} items={data.recentlyAdded} onOpen={setDetail} />
-          <RecentList title="Mới truy cập" icon={Clock} items={data.recentlyAccessed} onOpen={setDetail} />
-          <RecentList title="Yêu thích" icon={Star} items={data.favorites} onOpen={setDetail} />
-        </div>)}
-      {detail != null && <DocumentDetail id={detail} onClose={() => setDetail(null)} onChanged={load} readOnly />}
-      {adding && <DocumentForm onClose={() => setAdding(false)} onSaved={d => { setAdding(false); load(); setDetail(d.id) }} />}
+      {empty ?
+        <EmptyState
+          title="Kho giáo án đang trống"
+          text="Hãy thêm tài liệu, bài tập hoặc đoạn mã đầu tiên."
+          action={
+            <Button
+              variant="primary"
+              onClick={() => setAdding(true)}
+            >
+              <Plus className="h-4 w-4" />
+              Thêm tài liệu đầu tiên
+            </Button>
+          } /> : (
+          <div className="grid gap-4 xl:grid-cols-3">
+            <RecentList
+              title="Mới thêm gần đây"
+              icon={Plus}
+              items={data.recentlyAdded}
+              onOpen={setDetail}
+            />
+            <RecentList
+              title="Mới truy cập"
+              icon={Clock} items={data.recentlyAccessed}
+              onOpen={setDetail}
+            />
+            <RecentList
+              title="Yêu thích"
+              icon={Star}
+              items={data.favorites}
+              onOpen={setDetail}
+            />
+          </div>)}
+      {detail != null &&
+        <DocumentDetail
+          id={detail}
+          onClose={() => setDetail(null)}
+          onChanged={load}
+          readOnly
+        />
+      }
+      {adding &&
+        <DocumentForm
+          onClose={() => setAdding(false)}
+          onSaved={d => { setAdding(false); load(); setDetail(d.id) }}
+        />
+      }
     </div>
   )
 }

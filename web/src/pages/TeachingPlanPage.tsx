@@ -26,7 +26,8 @@ import {
   Search,
   Upload,
   FileCheck,
-  Download
+  Download,
+  RotateCcw
 } from 'lucide-react'
 import { api } from '../services/api'
 import { useApp, errText } from '../stores/appStore'
@@ -531,7 +532,7 @@ export default function TeachingPlanPage() {
             title="Xuất bảng Kế hoạch dạy học theo đúng mẫu Phụ lục 3 Công văn 5512 ra file Word (.docx)"
           >
             <Download className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-            Xuất Word (CV 5512)
+            Xuất file
           </Button>
           <Button
             variant="secondary"
@@ -539,8 +540,7 @@ export default function TeachingPlanPage() {
             loading={generating}
             title="Tự động lập danh sách 35 tuần từ các bài học Tin học GDPT 2018 theo mẫu chuẩn"
           >
-            <Sparkles className="h-4 w-4 text-amber-500" />
-            Khởi tạo nhanh từ bài học
+            Khởi tạo nhanh KHGD
           </Button>
           <Button
             variant="primary"
@@ -798,6 +798,58 @@ export default function TeachingPlanPage() {
             </Button>
           }
         />
+      ) : filteredItems.length === 0 ? (
+        <EmptyState
+          icon={<Clock className="h-10 w-10 text-slate-400" />}
+          title="Không có tiết dạy nào phù hợp"
+          text={`Không tìm thấy tiết dạy nào ở trạng thái "${statusFilter === '1' ? 'Đã dạy' :
+              statusFilter === '0' ? 'Chưa dạy' :
+                statusFilter === '2' ? 'Nghỉ / Hoãn' :
+                  statusFilter === '3' ? 'Dạy bù' : 'đang chọn'
+            }" trong ${semesterFilter === 'sem1' ? 'Học kỳ 1' :
+              semesterFilter === 'sem2' ? 'Học kỳ 2' : 'cả năm'
+            }.`}
+          action={
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setStatusFilter('all')
+                setSemesterFilter('all')
+              }}
+              className="mt-3"
+            >
+              <RotateCcw className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+              Đặt lại bộ lọc (Xem tất cả)
+            </Button>
+          }
+        />
+      ) : filteredItems.length === 0 ? (
+        <EmptyState
+          icon={<Clock className="h-10 w-10 text-slate-400" />}
+          title="Không có tiết dạy nào phù hợp"
+          text={`Không tìm thấy tiết dạy nào ở trạng thái "${
+            statusFilter === '1' ? 'Đã dạy' :
+            statusFilter === '0' ? 'Chưa dạy' :
+            statusFilter === '2' ? 'Nghỉ / Hoãn' :
+            statusFilter === '3' ? 'Dạy bù' : 'đang chọn'
+          }" trong ${
+            semesterFilter === 'sem1' ? 'Học kỳ 1' :
+            semesterFilter === 'sem2' ? 'Học kỳ 2' : 'cả năm'
+          }.`}
+          action={
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setStatusFilter('all')
+                setSemesterFilter('all')
+              }}
+              className="mt-3"
+            >
+              <RotateCcw className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+              Đặt lại bộ lọc (Xem tất cả)
+            </Button>
+          }
+        />
       ) : (
         <div className="overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
           <div className="overflow-x-auto">
@@ -905,10 +957,10 @@ export default function TeachingPlanPage() {
                                           isDone
                                             ? 'bg-emerald-600 text-white hover:bg-emerald-700'
                                             : isPostponed
-                                            ? 'bg-amber-500 text-white hover:bg-amber-600'
-                                            : isMakeUp
-                                            ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'
+                                              ? 'bg-amber-500 text-white hover:bg-amber-600'
+                                              : isMakeUp
+                                                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'
                                         )}
                                       >
                                         {isDone ? (
@@ -980,8 +1032,8 @@ export default function TeachingPlanPage() {
                                                 isKHBD
                                                   ? 'text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-950/50'
                                                   : isSlide
-                                                  ? 'text-amber-700 hover:bg-amber-50 dark:text-amber-300 dark:hover:bg-amber-950/50'
-                                                  : 'text-purple-700 hover:bg-purple-50 dark:text-purple-300 dark:hover:bg-purple-950/50'
+                                                    ? 'text-amber-700 hover:bg-amber-50 dark:text-amber-300 dark:hover:bg-amber-950/50'
+                                                    : 'text-purple-700 hover:bg-purple-50 dark:text-purple-300 dark:hover:bg-purple-950/50'
                                               )}
                                             >
                                               {isPinned ? (
@@ -1044,7 +1096,7 @@ export default function TeachingPlanPage() {
                                         onBlur={e => handleNoteBlur(item, e.target.value)}
                                         onKeyDown={e => {
                                           if (e.key === 'Enter') {
-                                            ;(e.target as HTMLInputElement).blur()
+                                            ; (e.target as HTMLInputElement).blur()
                                           }
                                         }}
                                         className="w-full rounded border border-transparent bg-transparent px-1.5 py-0.5 text-xs text-slate-600 hover:border-slate-200 focus:border-indigo-500 focus:bg-white dark:hover:border-slate-700 dark:focus:bg-slate-800 dark:text-slate-300"
@@ -1227,8 +1279,8 @@ export default function TeachingPlanPage() {
                               doc.documentTypeId === 1
                                 ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
                                 : doc.documentTypeId === 2
-                                ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
-                                : 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300'
+                                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
+                                  : 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300'
                             )}
                           >
                             {doc.documentTypeName}
