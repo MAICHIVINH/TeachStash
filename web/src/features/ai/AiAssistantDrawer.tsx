@@ -5,18 +5,13 @@ import {
   Settings,
   Copy,
   Check,
-  CheckCircle2,
   FileText,
   Code2,
   ListChecks,
   KeyRound,
   ExternalLink,
-  ChevronDown,
-  ChevronUp,
   Download,
   AlertCircle,
-  HelpCircle,
-  Lightbulb,
   Save,
   Eye,
   EyeOff
@@ -32,8 +27,8 @@ import type {
 } from '../../types'
 
 interface AiAssistantDrawerProps {
-  open: boolean
-  onClose: () => void
+  readonly open: boolean
+  readonly onClose: () => void
 }
 
 const MODEL_PRESETS = [
@@ -64,7 +59,7 @@ function formatCleanObjectives(text: string): string {
       // Đổi dấu * hoặc + ở đầu dòng thành dấu gạch ngang -
       l = l.replace(/^[*+]\s+/, '- ')
       // Xóa dấu in đậm ** hoặc __
-      l = l.replace(/\*\*/g, '').replace(/__/g, '')
+      l = l.replaceAll('**', '').replaceAll('__', '')
       return l
     })
     .join('\n')
@@ -131,7 +126,7 @@ export function AiAssistantDrawer({ open, onClose }: AiAssistantDrawerProps) {
       const s = await api.ai.settings()
       setAiSettings(s)
       if (s.hasKey) {
-        loadAvailableModels()
+        await loadAvailableModels()
       }
       if (s.currentModel) {
         const found = MODEL_PRESETS.some(m => m.value === s.currentModel)
@@ -149,7 +144,7 @@ export function AiAssistantDrawer({ open, onClose }: AiAssistantDrawerProps) {
 
   useEffect(() => {
     if (open) {
-      loadSettings()
+      void loadSettings()
     }
   }, [open])
 
@@ -171,8 +166,8 @@ export function AiAssistantDrawer({ open, onClose }: AiAssistantDrawerProps) {
       })
       await loadAvailableModels(apiKeyInput.trim() || undefined)
       toast('success', 'Kết nối Google Gemini API thành công! Khóa API và Model hoạt động chuẩn xác.')
-    } catch (e: any) {
-      toast('error', errText(e))
+    } catch (error_: unknown) {
+      toast('error', errText(error_))
     } finally {
       setTestingConnection(false)
     }
@@ -191,8 +186,8 @@ export function AiAssistantDrawer({ open, onClose }: AiAssistantDrawerProps) {
       setApiKeyInput('')
       setShowSettingsModal(false)
       toast('success', 'Đã lưu cấu hình Trợ lý AI (Gemini) thành công.')
-    } catch (e: any) {
-      toast('error', errText(e))
+    } catch (error_: unknown) {
+      toast('error', errText(error_))
     } finally {
       setSavingSettings(false)
     }
@@ -215,8 +210,8 @@ export function AiAssistantDrawer({ open, onClose }: AiAssistantDrawerProps) {
       })
       setGeneratedMcqList(res)
       toast('success', `AI đã sinh thành công ${res.length} câu hỏi trắc nghiệm!`)
-    } catch (e: any) {
-      toast('error', errText(e))
+    } catch (error_: unknown) {
+      toast('error', errText(error_))
     } finally {
       setGeneratingMcq(false)
     }
@@ -227,17 +222,18 @@ export function AiAssistantDrawer({ open, onClose }: AiAssistantDrawerProps) {
     if (generatedMcqList.length === 0) return
     const text = generatedMcqList
       .map((q, idx) => {
+        const hintSuffix = q.hint ? `\nGợi ý: ${q.hint}` : ''
         return `Câu ${idx + 1} (${q.difficultyName}): ${q.statement}
 A. ${q.optionA}
 B. ${q.optionB}
 C. ${q.optionC}
 D. ${q.optionD}
 Đáp án đúng: ${q.correctAnswer}
-Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
+Lời giải: ${q.solution}${hintSuffix}`
       })
       .join('\n\n')
 
-    navigator.clipboard.writeText(text)
+    void navigator.clipboard.writeText(text)
     setCopiedMcq(true)
     setTimeout(() => setCopiedMcq(false), 2000)
     toast('success', 'Đã sao chép tất cả câu hỏi vào bộ nhớ tạm!')
@@ -254,8 +250,8 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
         questions: generatedMcqList
       })
       toast('success', `Đã lưu thành công ${res.count} câu hỏi vào Ngân hàng bài tập!`)
-    } catch (e: any) {
-      toast('error', errText(e))
+    } catch (error_: unknown) {
+      toast('error', errText(error_))
     } finally {
       setSavingExercises(false)
     }
@@ -277,8 +273,8 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
       })
       setGeneratedTests(res)
       toast('success', `AI đã sinh thành công ${res.length} bộ testcase!`)
-    } catch (e: any) {
-      toast('error', errText(e))
+    } catch (error_: unknown) {
+      toast('error', errText(error_))
     } finally {
       setGeneratingTests(false)
     }
@@ -290,12 +286,15 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
     const md = [
       '| # | Input | Output | Trường hợp kiểm thử |',
       '|---|---|---|---|',
-      ...generatedTests.map(
-        t => `| Test ${t.index} | \`${t.input.replace(/\n/g, '\\n')}\` | \`${t.output.replace(/\n/g, '\\n')}\` | ${t.explanation}${t.isEdgeCase ? ' *(Biên)*' : ''} |`
-      )
+      ...generatedTests.map(t => {
+        const inStr = t.input.replaceAll('\n', String.raw`\n`)
+        const outStr = t.output.replaceAll('\n', String.raw`\n`)
+        const edge = t.isEdgeCase ? ' *(Biên)*' : ''
+        return `| Test ${t.index} | \`${inStr}\` | \`${outStr}\` | ${t.explanation}${edge} |`
+      })
     ].join('\n')
 
-    navigator.clipboard.writeText(md)
+    void navigator.clipboard.writeText(md)
     setCopiedTests(true)
     setTimeout(() => setCopiedTests(false), 2000)
     toast('success', 'Đã sao chép bảng Testcase (Markdown) vào bộ nhớ tạm!')
@@ -334,8 +333,8 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
       })
       setGeneratedObjMarkdown(formatCleanObjectives(res.objectivesMarkdown))
       toast('success', 'AI đã soạn thảo xong mục tiêu bài dạy theo CV 5512!')
-    } catch (e: any) {
-      toast('error', errText(e))
+    } catch (error_: unknown) {
+      toast('error', errText(error_))
     } finally {
       setGeneratingObj(false)
     }
@@ -344,7 +343,7 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
   // Copy Objectives
   const handleCopyObjectives = () => {
     if (!generatedObjMarkdown) return
-    navigator.clipboard.writeText(generatedObjMarkdown)
+    void navigator.clipboard.writeText(generatedObjMarkdown)
     setCopiedObj(true)
     setTimeout(() => setCopiedObj(false), 2000)
     toast('success', 'Đã sao chép mục tiêu bài dạy vào bộ nhớ tạm!')
@@ -355,8 +354,10 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+      <button
+        type="button"
+        aria-label="Đóng bảng trợ lý AI"
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity cursor-default border-0 p-0"
         onClick={onClose}
       />
 
@@ -466,7 +467,7 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
               )}
             >
               <FileText className="h-3.5 w-3.5" />
-              Mục tiêu CV 5512
+              KHBD CV 5512
             </button>
           </div>
 
@@ -478,7 +479,7 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                    <label htmlFor="ai-mcq-text" className="text-xs font-semibold text-slate-700 dark:text-slate-200">
                       Nội dung văn bản kiến thức SGK:
                     </label>
                     <button
@@ -490,6 +491,7 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
                     </button>
                   </div>
                   <textarea
+                    id="ai-mcq-text"
                     rows={4}
                     value={mcqText}
                     onChange={e => setMcqText(e.target.value)}
@@ -504,10 +506,11 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
 
                 <div className="grid grid-cols-3 gap-2.5">
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
+                    <label htmlFor="ai-mcq-grade" className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
                       Khối lớp
                     </label>
                     <select
+                      id="ai-mcq-grade"
                       value={mcqGrade}
                       onChange={e => setMcqGrade(e.target.value ? Number(e.target.value) : '')}
                       className={cx(inputCls, 'text-xs py-1.5')}
@@ -520,10 +523,11 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
+                    <label htmlFor="ai-mcq-topic" className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
                       Chủ đề
                     </label>
                     <select
+                      id="ai-mcq-topic"
                       value={mcqTopicId}
                       onChange={e => setMcqTopicId(e.target.value ? Number(e.target.value) : '')}
                       className={cx(inputCls, 'text-xs py-1.5')}
@@ -538,10 +542,11 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
+                    <label htmlFor="ai-mcq-count" className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
                       Số câu hỏi
                     </label>
                     <select
+                      id="ai-mcq-count"
                       value={mcqCount}
                       onChange={e => setMcqCount(Number(e.target.value))}
                       className={cx(inputCls, 'text-xs py-1.5')}
@@ -604,7 +609,7 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
 
                         return (
                           <div
-                            key={idx}
+                            key={`${q.difficulty}-${q.statement.slice(0, 30)}-${q.correctAnswer}`}
                             className="rounded-xl border border-slate-200 bg-slate-50/50 p-3.5 text-xs space-y-2 dark:border-slate-800 dark:bg-slate-900/40 shadow-sm"
                           >
                             <div className="flex items-center justify-between gap-2">
@@ -674,7 +679,7 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                    <label htmlFor="ai-test-statement" className="text-xs font-semibold text-slate-700 dark:text-slate-200">
                       Đề bài bài toán lập trình:
                     </label>
                     <button
@@ -686,6 +691,7 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
                     </button>
                   </div>
                   <textarea
+                    id="ai-test-statement"
                     rows={4}
                     value={testStatement}
                     onChange={e => setTestStatement(e.target.value)}
@@ -696,10 +702,11 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
+                    <label htmlFor="ai-test-lang" className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
                       Ngôn ngữ lập trình
                     </label>
                     <select
+                      id="ai-test-lang"
                       value={testLanguage}
                       onChange={e => setTestLanguage(e.target.value)}
                       className={cx(inputCls, 'text-xs py-1.5')}
@@ -712,10 +719,11 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
+                    <label htmlFor="ai-test-count" className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
                       Số lượng testcase
                     </label>
                     <select
+                      id="ai-test-count"
                       value={testCount}
                       onChange={e => setTestCount(Number(e.target.value))}
                       className={cx(inputCls, 'text-xs py-1.5')}
@@ -809,10 +817,11 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
             {tab === 'objectives' && (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                  <label htmlFor="ai-obj-lesson" className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
                     Tên bài học: <span className="text-rose-500">*</span>
                   </label>
                   <input
+                    id="ai-obj-lesson"
                     type="text"
                     value={objLessonName}
                     onChange={e => setObjLessonName(e.target.value)}
@@ -823,10 +832,11 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
+                    <label htmlFor="ai-obj-grade" className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
                       Khối lớp
                     </label>
                     <select
+                      id="ai-obj-grade"
                       value={objGrade}
                       onChange={e => setObjGrade(e.target.value ? Number(e.target.value) : '')}
                       className={cx(inputCls, 'text-xs py-1.5')}
@@ -838,9 +848,9 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
+                    <span className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
                       Định dạng chuẩn
-                    </label>
+                    </span>
                     <div className="rounded border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs text-slate-600 font-medium dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                       Công văn 5512/BGDĐT
                     </div>
@@ -848,10 +858,11 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
+                  <label htmlFor="ai-obj-req" className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
                     Yêu cầu bổ sung của bạn (tùy chọn)
                   </label>
                   <input
+                    id="ai-obj-req"
                     type="text"
                     value={objRequirements}
                     onChange={e => setObjRequirements(e.target.value)}
@@ -919,7 +930,7 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
                 <div className="space-y-3 text-xs">
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="font-semibold text-slate-700 dark:text-slate-200">
+                      <label htmlFor="ai-api-key" className="font-semibold text-slate-700 dark:text-slate-200">
                         Gemini API Key cá nhân:
                       </label>
                       <a
@@ -933,6 +944,7 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
                     </div>
                     <div className="relative">
                       <input
+                        id="ai-api-key"
                         type={showKey ? 'text' : 'password'}
                         value={apiKeyInput}
                         onChange={e => setApiKeyInput(e.target.value)}
@@ -953,10 +965,11 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                    <label htmlFor="ai-model-select" className="block font-semibold text-slate-700 dark:text-slate-200 mb-1">
                       Model Gemini:
                     </label>
                     <select
+                      id="ai-model-select"
                       value={selectedModel}
                       onChange={e => setSelectedModel(e.target.value)}
                       className={cx(inputCls, 'text-xs')}
@@ -982,10 +995,11 @@ Lời giải: ${q.solution}${q.hint ? `\nGợi ý: ${q.hint}` : ''}`
 
                   {selectedModel === 'custom' && (
                     <div>
-                      <label className="block font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                      <label htmlFor="ai-custom-model" className="block font-semibold text-slate-700 dark:text-slate-200 mb-1">
                         Tên Model tùy chỉnh:
                       </label>
                       <input
+                        id="ai-custom-model"
                         type="text"
                         value={customModelInput}
                         onChange={e => setCustomModelInput(e.target.value)}

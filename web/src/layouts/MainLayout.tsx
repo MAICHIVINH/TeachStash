@@ -99,6 +99,7 @@ export default function MainLayout({ onLock }: { onLock: () => void }) {
     saveStoredHistory(next)
     setShowHistory(false)
     nav(`/search?q=${encodeURIComponent(clean)}`)
+    // console.log('Lich su tim kiem:', next)
   }
 
   const removeHistoryItem = (e: React.MouseEvent, item: string) => {
@@ -106,6 +107,7 @@ export default function MainLayout({ onLock }: { onLock: () => void }) {
     const next = history.filter(h => h !== item)
     setHistory(next)
     saveStoredHistory(next)
+    // console.log('Lich su tim kiem:', next)
   }
 
   const clearAllHistory = (e: React.MouseEvent) => {

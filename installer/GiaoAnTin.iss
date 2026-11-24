@@ -19,7 +19,7 @@ PrivilegesRequired=lowest
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 [Files]
-Source: "..\publish\KhoGiaoAnTinHoc\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
+Source: "..\publish\TeachStash\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
 Source: "MicrosoftEdgeWebview2Setup.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExe}"

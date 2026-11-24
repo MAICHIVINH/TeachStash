@@ -256,10 +256,17 @@ Kết quả xuất ra tại:
 
 ## 6. Đóng gói bộ cài đặt Setup (.exe)
 
+### Cách A: Chạy script tự động 1 lệnh
+```powershell
+.\scripts\build-installer.ps1
+```
+*(Script sẽ tự động chạy publish, tìm trình biên dịch Inno Setup `ISCC.exe` và xuất file cài đặt).*
+
+### Cách B: Thực hiện thủ công
 1. Chạy lệnh xuất bản độc lập: `.\scripts\publish.ps1`.
 2. (Tùy chọn) Tải `MicrosoftEdgeWebview2Setup.exe` đặt vào thư mục `installer\` nếu muốn bộ cài tự động cài WebView2 khi máy đích thiếu.
-3. Mở tệp `installer\GiaoAnTin.iss` bằng **Inno Setup 6** và nhấn **Compile** (hoặc dùng dòng lệnh: `ISCC.exe installer\GiaoAnTin.iss`).
-4. Tệp cài đặt cuối cùng sẽ nằm tại: `publish\installer\KhoGiaoAnTinHoc-Setup.exe`.
+3. Mở tệp `installer\GiaoAnTin.iss` bằng **Inno Setup 6** và nhấn **Compile** (`Ctrl + F9`) (hoặc dùng dòng lệnh: `ISCC.exe installer\GiaoAnTin.iss`).
+4. Tệp cài đặt cuối cùng sẽ nằm tại: `publish\installer\TeachStash-Setup.exe`.
 
 ---
 

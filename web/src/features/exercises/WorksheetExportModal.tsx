@@ -1,12 +1,7 @@
 import { useState, useMemo } from 'react'
 import {
   Download,
-  FileText,
-  CheckCircle2,
-  ListChecks,
-  Code2,
-  Sparkles,
-  HelpCircle
+  Code2
 } from 'lucide-react'
 import { Modal, Button, Field, inputCls, cx } from '../../components/ui'
 import { useApp } from '../../stores/appStore'

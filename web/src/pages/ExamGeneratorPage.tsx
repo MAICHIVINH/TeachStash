@@ -1,28 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft,
-  ArrowRight,
   BookOpen,
   Check,
   CheckCircle2,
   ChevronRight,
   Download,
-  FileSpreadsheet,
-  FileText,
-  HelpCircle,
-  Layers,
-  Lightbulb,
-  Plus,
   RefreshCw,
   Save,
-  Shuffle,
   Trash2,
-  X,
 } from 'lucide-react'
 import { api } from '../services/api'
 import { useApp } from '../stores/appStore'
-import { Badge, Button, CustomSelect, Field, Modal, Spinner, cx, inputCls } from '../components/ui'
+import { Badge, Button, Field, Modal, Spinner, inputCls } from '../components/ui'
 import type { ExamMatrixTemplate, Exercise } from '../types'
 import { DIFFICULTIES, DIFFICULTY_STYLE } from '../utils/format'
 import {

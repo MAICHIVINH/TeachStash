@@ -7,7 +7,14 @@ import { CodeBlock, CodeEditor } from '../../components/CodeBlock'
 import type { Exercise, ExerciseSave } from '../../types'
 import { DIFFICULTIES, DIFFICULTY_STYLE } from '../../utils/format'
 
-export function ExerciseDetail({ ex, onClose, onEdit, onDelete }: { ex: Exercise; onClose: () => void; onEdit?: () => void; onDelete?: () => void }) {
+interface ExerciseDetailProps {
+  readonly ex: Exercise
+  readonly onClose: () => void
+  readonly onEdit?: () => void
+  readonly onDelete?: () => void
+}
+
+export function ExerciseDetail({ ex, onClose, onEdit, onDelete }: ExerciseDetailProps) {
   const [hint, setHint] = useState(false)
   const [sol, setSol] = useState(false)
   const [code, setCode] = useState(false)
@@ -125,7 +132,19 @@ export function ExerciseDetail({ ex, onClose, onEdit, onDelete }: { ex: Exercise
   )
 }
 
-export function ExerciseForm({ ex, onClose, onSaved }: { ex: Exercise | null; onClose: () => void; onSaved: () => void }) {
+function resolveExerciseType(ex: Exercise | null): number {
+  if (!ex) return 1
+  if (ex.exerciseType != null) return ex.exerciseType
+  return (ex.optionA || ex.optionB || ex.optionC || ex.optionD) ? 1 : 2
+}
+
+interface ExerciseFormProps {
+  readonly ex: Exercise | null
+  readonly onClose: () => void
+  readonly onSaved: () => void
+}
+
+export function ExerciseForm({ ex, onClose, onSaved }: ExerciseFormProps) {
   const { lookups, toast, confirm } = useApp()
   const initial: ExerciseSave = useMemo(() => ({
     title: ex?.title ?? '',
@@ -134,7 +153,7 @@ export function ExerciseForm({ ex, onClose, onSaved }: { ex: Exercise | null; on
     topicId: ex?.topicId ?? null,
     lessonId: ex?.lessonId ?? null,
     difficulty: ex?.difficulty ?? 2,
-    exerciseType: ex?.exerciseType ?? (ex?.optionA || ex?.optionB ? 1 : 1),
+    exerciseType: resolveExerciseType(ex),
     optionA: ex?.optionA ?? '',
     optionB: ex?.optionB ?? '',
     optionC: ex?.optionC ?? '',
@@ -183,11 +202,11 @@ export function ExerciseForm({ ex, onClose, onSaved }: { ex: Exercise | null; on
       })
       toast('success', 'Đã lưu bài tập.')
       onSaved()
-    } catch (er) {
-      if (er instanceof ApiError && er.errors) {
-        setErrors(Object.fromEntries(Object.entries(er.errors).map(([k, v]) => [k, v[0]])))
+    } catch (error_) {
+      if (error_ instanceof ApiError && error_.errors) {
+        setErrors(Object.fromEntries(Object.entries(error_.errors).map(([k, v]) => [k, v[0]])))
       }
-      toast('error', errText(er))
+      toast('error', errText(error_))
     } finally {
       setBusy(false)
     }
@@ -228,7 +247,7 @@ export function ExerciseForm({ ex, onClose, onSaved }: { ex: Exercise | null; on
         </div>
 
         <Field label="Tiêu đề" required error={errors.title}>
-          <input autoFocus className={inputCls} placeholder="Ví dụ: Câu hỏi về thuật toán sắp xếp" value={f.title} onChange={e => set('title', e.target.value)} />
+          <input className={inputCls} placeholder="Ví dụ: Câu hỏi về thuật toán sắp xếp" value={f.title} onChange={e => set('title', e.target.value)} />
         </Field>
 
         <div className="grid grid-cols-2 gap-3">
@@ -270,8 +289,7 @@ export function ExerciseForm({ ex, onClose, onSaved }: { ex: Exercise | null; on
                 return (
                   <div
                     key={key}
-                    onClick={() => set('correctAnswer', key)}
-                    className={`relative flex items-center gap-2.5 rounded-lg border p-2 transition-all cursor-pointer ${
+                    className={`relative flex items-center gap-2.5 rounded-lg border p-2 transition-all ${
                       isCorrect
                         ? 'border-emerald-500 bg-emerald-50/80 shadow-sm dark:border-emerald-500/80 dark:bg-emerald-950/40'
                         : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900'
@@ -279,12 +297,13 @@ export function ExerciseForm({ ex, onClose, onSaved }: { ex: Exercise | null; on
                   >
                     <button
                       type="button"
-                      onClick={(e) => { e.stopPropagation(); set('correctAnswer', key) }}
+                      onClick={() => set('correctAnswer', key)}
                       className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-transform active:scale-90 ${
                         isCorrect
                           ? 'bg-emerald-600 text-white shadow'
                           : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-300'
                       }`}
+                      aria-label={`Chọn đáp án ${key}`}
                       title={isCorrect ? 'Đáp án đúng' : 'Nhấn để chọn làm đáp án đúng'}
                     >
                       {isCorrect ? <CheckCircle2 className="h-4 w-4" /> : key}
@@ -295,7 +314,6 @@ export function ExerciseForm({ ex, onClose, onSaved }: { ex: Exercise | null; on
                       placeholder={`Nội dung phương án ${key}...`}
                       value={(f[optKey] as string) ?? ''}
                       onChange={e => set(optKey, e.target.value)}
-                      onClick={e => e.stopPropagation()}
                     />
                     {err && <span className="absolute -bottom-4 left-2 text-[10px] text-rose-500">{err}</span>}
                   </div>

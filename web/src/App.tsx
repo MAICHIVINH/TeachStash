@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Route, Routes, Navigate } from 'react-router-dom'
 import { api } from './services/api'
 import { errText, useApp } from './stores/appStore'
-import { Button, ConfirmHost, ErrorState, Spinner, ToastHost, inputCls } from './components/ui'
+import { Button, ConfirmHost, ErrorState, Spinner, ToastHost } from './components/ui'
 import MainLayout from './layouts/MainLayout'
 import DashboardPage from './pages/DashboardPage'
 import DocumentsPage from './pages/DocumentsPage'
@@ -14,7 +14,7 @@ import SettingsPage from './pages/SettingsPage'
 import SearchPage from './pages/SearchPage'
 import ExamGeneratorPage from './pages/ExamGeneratorPage'
 import TeachingPlanPage from './pages/TeachingPlanPage'
-import { ArrowRight, Eye, EyeOff, KeyRound, Lock, ShieldCheck } from 'lucide-react'
+import { Eye, EyeOff, KeyRound, Lock, ShieldCheck } from 'lucide-react'
 
 function LockScreen({ onDone }: { onDone: () => void }) {
   const [pw, setPw] = useState('')
