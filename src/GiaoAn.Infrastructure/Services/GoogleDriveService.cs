@@ -176,61 +176,79 @@ public sealed class GoogleDriveService(
         if (!File.Exists(zipPath))
             throw new ValidationAppException("zipPath", "Không tìm thấy tệp sao lưu để tải lên.");
 
-        var service = await GetDriveServiceAsync(ct);
-        var folderId = await EnsureFolderExistsAsync(service, ct);
-
-        var fileName = Path.GetFileName(zipPath);
-        var fileMeta = new Google.Apis.Drive.v3.Data.File
+        try
         {
-            Name = fileName,
-            Parents = new List<string> { folderId },
-            Description = "TeachStash automated backup archive"
-        };
+            var service = await GetDriveServiceAsync(ct);
+            var folderId = await EnsureFolderExistsAsync(service, ct);
 
-        log.LogInformation("Bắt đầu tải tệp sao lưu {File} lên Google Drive...", fileName);
-        await using var stream = File.OpenRead(zipPath);
-        var uploadReq = service.Files.Create(fileMeta, stream, "application/zip");
-        uploadReq.Fields = "id, name, size, createdTime";
+            var fileName = Path.GetFileName(zipPath);
+            var fileMeta = new Google.Apis.Drive.v3.Data.File
+            {
+                Name = fileName,
+                Parents = new List<string> { folderId },
+                Description = "TeachStash automated backup archive"
+            };
 
-        var progress = await uploadReq.UploadAsync(ct);
-        if (progress.Status != Google.Apis.Upload.UploadStatus.Completed)
-        {
-            throw new InvalidOperationException($"Tải lên Google Drive thất bại: {progress.Exception?.Message ?? progress.Status.ToString()}");
+            log.LogInformation("Bắt đầu tải tệp sao lưu {File} lên Google Drive...", fileName);
+            await using var stream = File.OpenRead(zipPath);
+            var uploadReq = service.Files.Create(fileMeta, stream, "application/zip");
+            uploadReq.Fields = "id, name, size, createdTime";
+
+            var progress = await uploadReq.UploadAsync(ct);
+            if (progress.Status != Google.Apis.Upload.UploadStatus.Completed)
+            {
+                throw new InvalidOperationException($"Tải lên Google Drive thất bại: {progress.Exception?.Message ?? progress.Status.ToString()}");
+            }
+
+            var uploadedFile = uploadReq.ResponseBody;
+            log.LogInformation("Đã tải tệp lên Google Drive thành công: ID={Id}, Name={Name}", uploadedFile.Id, uploadedFile.Name);
+
+            // Kiểm tra và dọn dẹp theo hạn mức MaxBackups
+            var status = await GetStatusAsync(ct);
+            if (status.MaxBackups > 0)
+            {
+                await PruneOldBackupsAsync(service, folderId, status.MaxBackups, ct);
+            }
+
+            return uploadedFile.Id;
         }
-
-        var uploadedFile = uploadReq.ResponseBody;
-        log.LogInformation("Đã tải tệp lên Google Drive thành công: ID={Id}, Name={Name}", uploadedFile.Id, uploadedFile.Name);
-
-        // Kiểm tra và dọn dẹp theo hạn mức MaxBackups
-        var status = await GetStatusAsync(ct);
-        if (status.MaxBackups > 0)
+        catch (Google.Apis.Auth.OAuth2.Responses.TokenResponseException ex) when (ex.Error?.Error == "invalid_grant" || ex.Message.Contains("invalid_grant"))
         {
-            await PruneOldBackupsAsync(service, folderId, status.MaxBackups, ct);
+            log.LogWarning("Token Google Drive đã hết hạn hoặc bị thu hồi (invalid_grant). Tự động ngắt kết nối để người dùng đăng nhập lại.");
+            await DisconnectAsync(ct);
+            throw new ValidationAppException("gdrive", "Phiên kết nối Google Drive đã hết hạn hoặc bị hủy. Vui lòng kết nối lại tài khoản Google của bạn.");
         }
-
-        return uploadedFile.Id;
     }
 
     public async Task<IReadOnlyList<GoogleDriveFileDto>> ListBackupsAsync(CancellationToken ct = default)
     {
-        var service = await GetDriveServiceAsync(ct);
-        var folderId = await FindFolderIdAsync(service, ct);
-        if (string.IsNullOrEmpty(folderId))
-            return Array.Empty<GoogleDriveFileDto>();
+        try
+        {
+            var service = await GetDriveServiceAsync(ct);
+            var folderId = await FindFolderIdAsync(service, ct);
+            if (string.IsNullOrEmpty(folderId))
+                return Array.Empty<GoogleDriveFileDto>();
 
-        var listReq = service.Files.List();
-        listReq.Q = $"'{folderId}' in parents and trashed = false and name contains '.zip'";
-        listReq.Fields = "files(id, name, size, createdTime)";
-        listReq.OrderBy = "createdTime desc";
-        listReq.PageSize = 50;
+            var listReq = service.Files.List();
+            listReq.Q = $"'{folderId}' in parents and trashed = false and name contains '.zip'";
+            listReq.Fields = "files(id, name, size, createdTime)";
+            listReq.OrderBy = "createdTime desc";
+            listReq.PageSize = 50;
 
-        var result = await listReq.ExecuteAsync(ct);
-        return result.Files.Select(f => new GoogleDriveFileDto(
-            f.Id,
-            f.Name,
-            f.Size ?? 0,
-            f.CreatedTimeDateTimeOffset?.UtcDateTime ?? DateTime.UtcNow
-        )).ToList();
+            var result = await listReq.ExecuteAsync(ct);
+            return result.Files.Select(f => new GoogleDriveFileDto(
+                f.Id,
+                f.Name,
+                f.Size ?? 0,
+                f.CreatedTimeDateTimeOffset?.UtcDateTime ?? DateTime.UtcNow
+            )).ToList();
+        }
+        catch (Google.Apis.Auth.OAuth2.Responses.TokenResponseException ex) when (ex.Error?.Error == "invalid_grant" || ex.Message.Contains("invalid_grant"))
+        {
+            log.LogWarning("Token Google Drive đã hết hạn hoặc bị thu hồi (invalid_grant). Tự động ngắt kết nối để người dùng đăng nhập lại.");
+            await DisconnectAsync(ct);
+            throw new ValidationAppException("gdrive", "Phiên kết nối Google Drive đã hết hạn hoặc bị hủy. Vui lòng kết nối lại tài khoản Google của bạn.");
+        }
     }
 
     public async Task<string> DownloadBackupAsync(string fileId, CancellationToken ct = default)

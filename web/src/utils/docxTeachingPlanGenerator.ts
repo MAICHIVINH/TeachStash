@@ -209,10 +209,10 @@ export async function exportTeachingPlanToDocx(
         countLT += p.lt
         countTH += p.th
       })
-      const summary = formatPeriodsSummary(countLT, countTH)
       const baseName = item.topicName
         ? item.topicName.toUpperCase()
         : 'CHỦ ĐỀ KHÁC / BÀI HỌC BỔ TRỢ'
+      const summary = formatPeriodsSummary(countLT, countTH, baseName)
       const topicText = `${baseName}${summary}`
       tableRows.push(
         new TableRow({

@@ -177,10 +177,18 @@ public class TeachingPlanItemSaveRequest
     public string? Equipment { get; set; }
     public string? Location { get; set; }
     public int? TopicId { get; set; }
+    public string? TopicName { get; set; }
     public int? LessonId { get; set; }
     public string? Notes { get; set; }
     public string? Note { get => Notes; set => Notes = value; }
     public int SortOrder { get; set; }
+}
+
+public class ImportTeachingPlanRequest
+{
+    public int GradeLevelId { get; set; }
+    public bool ReplaceExisting { get; set; } = true;
+    public List<TeachingPlanItemSaveRequest> Items { get; set; } = new();
 }
 
 public record TeachingClassDto(

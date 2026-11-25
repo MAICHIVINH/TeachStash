@@ -9,9 +9,9 @@
 
 ---
 
-## 🌟 Các tính năng chính (Key Features)
+## Các tính năng chính (Key Features)
 
-### 1. Kế hoạch giảng dạy & Phân phối chương trình (PPCT Planner) (Mới ⭐)
+### 1. Kế hoạch giảng dạy & Phân phối chương trình (PPCT Planner)
 - **Tiến độ chuẩn 35 tuần chuẩn mẫu Công văn 5512 (Phụ lục 3):**
   - Bảng theo dõi trực quan đúng cấu trúc chuẩn của Bộ GD&ĐT: **STT $\rightarrow$ PPCT $\rightarrow$ Bài học $\rightarrow$ Số tiết $\rightarrow$ Tuần $\rightarrow$ Thiết bị dạy học $\rightarrow$ Địa điểm dạy học $\rightarrow$ Trạng thái $\rightarrow$ Ngày dạy $\rightarrow$ Tài liệu gắn kèm $\rightarrow$ Ghi chú**.
   - **Tự động gom nhóm chuyên nghiệp:** Phân nhóm theo **Học kỳ (Học kỳ 1 / Học kỳ 2)** và **Chủ đề** kèm tự động tính tổng số tiết lý thuyết + thực hành (ví dụ: `CHỦ ĐỀ 1. MÁY TÍNH VÀ XÃ HỘI TRI THỨC (10 tiết: 8LT+2TH)`).
@@ -32,7 +32,7 @@
   - Hệ thống tự động nhận diện và hiển thị các huy hiệu tài liệu gắn kèm theo bài học: **Giáo án (KHBD)** (xanh dương), **Bài giảng trình chiếu (PPTX)** (cam), **Phiếu học tập / Bài tập** (tím).
   - Nhấp trực tiếp vào huy hiệu tài liệu để mở ngay hộp thoại xem trước (Preview Modal), đọc nội dung tệp hoặc mở bằng ứng dụng trên máy mà không cần rời khỏi bảng kế hoạch.
 
-### 2. Trộn đề & Tạo đề kiểm tra tự động theo Ma trận GDPT 2018 (Mới ⭐)
+### 2. Trộn đề & Tạo đề kiểm tra tự động theo Ma trận GDPT 2018
 - **Quy trình 3 bước (Wizard) tinh gọn & chuyên nghiệp:**
   - **Bước 1: Thiết lập đề thi & Ma trận phân bổ:**
     - Cấu hình tiêu đề chuẩn: Tên trường/đơn vị, tên kỳ thi, khối lớp, môn học, thời gian làm bài.
@@ -49,7 +49,7 @@
       - Các file mã đề riêng lẻ: `De_101.docx`, `De_102.docx`, `De_103.docx`, `De_104.docx` (ẩn hoàn toàn các đường viền phụ, trình bày bảng phương án thoáng đẹp).
       - File `DapAn_Va_MaTran.docx`: Chứa **Bảng soi đáp án trắc nghiệm chéo** tất cả các mã đề (giúp chấm thi siêu tốc), **Hướng dẫn chấm & Đáp án chi tiết tự luận** và **Bảng ma trận đặc tả đề thi GDPT 2018**.
 
-### 2. Ngân hàng bài tập & Hỗ trợ Trắc nghiệm A/B/C/D (Mới ⭐)
+### 2. Ngân hàng bài tập & Hỗ trợ Trắc nghiệm A/B/C/D
 - **Hỗ trợ 2 chế độ câu hỏi linh hoạt:**
   - **Trắc nghiệm 4 lựa chọn (A, B, C, D):** Ô nhập đề bài, 4 ô nhập phương án rõ ràng, click nút tròn để đánh dấu nhanh đáp án đúng (tô màu xanh lục nổi bật).
   - **Tự luận / Lập trình:** Đề bài, gợi ý thuật toán, lời giải chi tiết và trình soạn mã nguồn mẫu (CodeEditor).
@@ -57,7 +57,7 @@
 - Phân cấp 4 mức độ nhận thức: **Nhận biết**, **Thông hiểu**, **Vận dụng**, **Vận dụng cao** kèm bộ lọc nhanh theo khối lớp, chủ đề, mức độ nhận thức và ngôn ngữ lập trình.
 - Nút **Sao chép đề bài nhanh** vào khay nhớ tạm để dán vào giáo án hoặc đề cương.
 
-### 3. Trợ lý AI Hỗ trợ Soạn bài (Google Gemini API Cá nhân) (Mới ⭐)
+### 3. Trợ lý AI Hỗ trợ Soạn bài (Google Gemini API Cá nhân)
 - **Thiết kế dạng Side Panel / Drawer bên phải:**
   - Nút biểu tượng Robot AI thông minh trên thanh Header cho phép mở nhanh trợ lý ở bất kỳ màn hình nào mà không làm gián đoạn luồng làm việc.
   - Lưu trữ API Key cục bộ an toàn trong máy tính, hỗ trợ đa dạng các model mới nhất: **`gemini-3.8-flash`** (mặc định), `gemini-2.5-flash`, `gemini-2.5-pro`, `gemini-2.0-flash`, `gemini-1.5-flash`, `gemini-1.5-pro` và tùy chọn tự nhập model bất kỳ.
@@ -67,7 +67,7 @@
   3. **Soạn mục tiêu bài dạy theo Công văn 5512:** Nhập tên bài học và khối lớp $\rightarrow$ AI soạn thảo hoàn chỉnh mục tiêu theo chuẩn 3 phần (Kiến thức, Năng lực chung + Năng lực Tin học NLa–NLe, Phẩm chất), sẵn sàng sao chép dán vào file Word giáo án.
 - **Cấu hình & Kiểm tra kết nối:** Tích hợp kiểm tra kết nối (Ping test) ngay trong Drawer và trang Cài đặt (Settings).
 
-### 4. Xuất nhanh Phiếu học tập / Bài tập ra Word (.docx) (Mới ⭐)
+### 4. Xuất nhanh Phiếu học tập / Bài tập ra Word (.docx)
 - **Tích chọn linh hoạt trong Kho bài tập:**
   - Ô checkbox chọn bài trên cả chế độ **Lưới thẻ** và **Danh sách**.
   - Nút **"Chọn tất cả trong trang"** giúp chọn nhanh cả trang 20 câu chỉ với 1 click.
@@ -83,16 +83,12 @@
   - *Nếu chọn cả Trắc nghiệm + Tự luận:* Tự động chia rõ thành `PHẦN I: TRẮC NGHIỆM` (kèm bảng đáp án) và `PHẦN II: TỰ LUẬN` (kèm dòng kẻ làm bài).
   - Xuất file `.docx` chuẩn A4 Dọc, font Times New Roman, căn lề 20mm chuẩn in ấn.
 
-### 4. Giao diện Bộ lọc ngang hiện đại (Modern Horizontal Filter Bar) (Mới ⭐)
-- Thay thế hoàn toàn thanh lọc dọc chiếm diện tích cũ bằng **Thanh lọc ngang 3 tầng hiện đại full-width (100% chiều rộng màn hình)** trên các trang: *Tất cả tài liệu*, *Giáo án*, *Bài giảng*, *Bài tập*, *Mã nguồn*.
-- **Dropdown chọn chủ đề tùy chỉnh (CustomSelect):** Tự động phát hiện vị trí mép phải màn hình để căn lề phù hợp, hỗ trợ tự động xuống dòng và hiển thị trọn vẹn các tên chủ đề dài của chương trình Tin học mới (không bị tràn màn hình hay bị che khuất).
-
-### 4. Lịch sử tìm kiếm Header (Search History) (Mới ⭐)
+### 5. Lịch sử tìm kiếm Header
 - Ghi nhớ tự động các từ khóa tìm kiếm gần nhất ngay trên thanh tìm kiếm trên cùng.
 - Menu dropdown thả xuống hiển thị danh sách từ khóa đã tìm kiếm, cho phép nhấp để tìm lại ngay lập tức.
 - Cho phép xóa từng từ khóa hoặc xóa toàn bộ lịch sử tìm kiếm dễ dàng.
 
-### 5. Quản lý tài liệu & giáo án đa định dạng
+### 6. Quản lý tài liệu & giáo án đa định dạng
 - Phân loại tài liệu theo **Loại** (Giáo án / KHBD, Bài giảng trình chiếu, Đề kiểm tra, Phiếu học tập, Tài liệu tham khảo...), **Khối lớp** (10, 11, 12), **Chủ đề** và **Bài học**.
 - Hỗ trợ xem trước (preview) trực tiếp trong ứng dụng:
   - **Tài liệu văn phòng:** PDF, Word (.docx), Excel (.xlsx, .xls), PowerPoint (.pptx).
@@ -100,11 +96,11 @@
   - **Mã nguồn:** Tự động tô màu cú pháp (Syntax Highlighting) cho C++, Python, Pascal, C#, Java, JavaScript, HTML/CSS, SQL.
 - Quản lý tệp vật lý an toàn bằng mã định danh GUID, chống trùng lặp và thất lạc tệp tin.
 
-### 6. Kho mã nguồn mẫu (Code Snippets)
+### 7. Kho mã nguồn mẫu
 - Lưu trữ các thuật toán, bài giải mẫu, đoạn code mẫu giảng dạy theo từng ngôn ngữ (Python, C++, Pascal, Scratch...).
 - Trình biên tập mã nguồn thông minh (giữ thụt lề, hỗ trợ Tab thụt dòng 4 dấu cách) và nút sao chép mã nguồn nhanh 1-click.
 
-### 7. Sao lưu nội bộ & Đồng bộ đám mây cá nhân (Google Drive Cloud Backup)
+### 8. Sao lưu nội bộ & Đồng bộ đám mây cá nhân (Google Drive Cloud Backup)
 - **Sao lưu ngoại tuyến (Local Backup):** Đóng gói toàn bộ cơ sở dữ liệu và tệp đính kèm thành tệp nén `.zip` tiêu chuẩn; hỗ trợ kiểm tra tính toàn vẹn (Validate) trước khi phục hồi.
 - **Đồng bộ Google Drive:**
   - Kết nối bảo mật tài khoản cá nhân qua Google OAuth 2.0 PKCE.
@@ -112,7 +108,7 @@
   - Quản lý hạn mức lưu trữ tự động trên đám mây (giữ lại N bản gần nhất để tránh đầy bộ nhớ Drive).
   - Khôi phục dữ liệu trực tiếp từ đám mây Google Drive về máy tính chỉ với 1 cú nhấp chuột.
 
-### 8. Bảo mật & Thùng rác an toàn
+### 9. Bảo mật & Thùng rác an toàn
 - Hỗ trợ khóa bảo mật bằng mật khẩu khởi động và tự động khóa sau khoảng thời gian không thao tác.
 - Thùng rác (Recycle Bin) cho phép xem lại, khôi phục hoặc dọn dẹp vĩnh viễn các tài liệu đã xóa.
 
@@ -259,6 +255,7 @@ Kết quả xuất ra tại:
 ### Cách A: Chạy script tự động 1 lệnh
 ```powershell
 .\scripts\build-installer.ps1
+.\build-installer.bat
 ```
 *(Script sẽ tự động chạy publish, tìm trình biên dịch Inno Setup `ISCC.exe` và xuất file cài đặt).*
 

@@ -116,6 +116,141 @@ public sealed class TeachingPlanService(IAppDbContext db) : ITeachingPlanService
         return newItems.Count;
     }
 
+    public async Task<int> ImportPlanItemsAsync(ImportTeachingPlanRequest req, CancellationToken ct)
+    {
+        if (req.GradeLevelId <= 0) throw new ValidationAppException("gradeLevelId", "Khối lớp không hợp lệ.");
+        if (req.Items == null || req.Items.Count == 0) return 0;
+
+        var now = DateTime.UtcNow;
+
+        // 1. Nếu thay thế toàn bộ khung hiện tại của khối lớp
+        if (req.ReplaceExisting)
+        {
+            var existingItems = await db.TeachingPlanItems
+                .Where(x => x.GradeLevelId == req.GradeLevelId)
+                .ToListAsync(ct);
+            if (existingItems.Count > 0)
+            {
+                db.TeachingPlanItems.RemoveRange(existingItems);
+            }
+        }
+
+        // 2. Tải danh sách Topic & Lesson hiện có của khối lớp để tự động map
+        var existingTopics = await db.Topics
+            .Include(t => t.Lessons)
+            .Where(t => t.GradeLevelId == req.GradeLevelId)
+            .ToListAsync(ct);
+
+        var topicDict = new Dictionary<string, Topic>(StringComparer.OrdinalIgnoreCase);
+        foreach (var t in existingTopics)
+        {
+            var key = t.Name.Trim();
+            if (!topicDict.ContainsKey(key))
+            {
+                topicDict[key] = t;
+            }
+        }
+
+        var newItems = new List<TeachingPlanItem>();
+        int order = 1;
+
+        foreach (var itemReq in req.Items)
+        {
+            int? topicId = itemReq.TopicId;
+            int? lessonId = itemReq.LessonId;
+
+            // Xử lý map hoặc tạo Topic nếu có TopicName
+            Topic? currentTopic = null;
+            if (topicId.HasValue && topicId.Value > 0)
+            {
+                currentTopic = topicDict.Values.FirstOrDefault(t => t.Id == topicId.Value);
+            }
+            else if (!string.IsNullOrWhiteSpace(itemReq.TopicName))
+            {
+                var cleanTopicName = itemReq.TopicName.Trim();
+                if (topicDict.TryGetValue(cleanTopicName, out var matchedTopic))
+                {
+                    currentTopic = matchedTopic;
+                    topicId = matchedTopic.Id;
+                }
+                else
+                {
+                    // Tạo Topic mới
+                    var newTopic = new Topic
+                    {
+                        GradeLevelId = req.GradeLevelId,
+                        Name = cleanTopicName,
+                        SortOrder = existingTopics.Count + topicDict.Count + 1
+                    };
+                    db.Topics.Add(newTopic);
+                    await db.SaveChangesAsync(ct);
+                    newTopic.Lessons = new List<Lesson>();
+                    topicDict[cleanTopicName] = newTopic;
+                    currentTopic = newTopic;
+                    topicId = newTopic.Id;
+                }
+            }
+
+            // Tự động tìm LessonId hoặc TỰ ĐỘNG TẠO MỚI Lesson thuộc Topic nếu chưa có
+            if (!string.IsNullOrWhiteSpace(itemReq.Title))
+            {
+                var titleTrim = itemReq.Title.Trim();
+
+                if ((!lessonId.HasValue || lessonId.Value <= 0) && currentTopic != null)
+                {
+                    // 1. Tìm trong danh sách bài học của topic này trước
+                    var matchedLesson = currentTopic.Lessons.FirstOrDefault(l =>
+                        string.Equals(l.Name.Trim(), titleTrim, StringComparison.OrdinalIgnoreCase) ||
+                        titleTrim.Contains(l.Name.Trim(), StringComparison.OrdinalIgnoreCase) ||
+                        l.Name.Trim().Contains(titleTrim, StringComparison.OrdinalIgnoreCase));
+
+                    if (matchedLesson != null)
+                    {
+                        lessonId = matchedLesson.Id;
+                    }
+                    else
+                    {
+                        // 2. Nếu chưa có bài học này trong Chủ đề -> TỰ ĐỘNG TẠO BÀI HỌC MỚI thuộc Chủ đề đó!
+                        var newLesson = new Lesson
+                        {
+                            Name = titleTrim,
+                            TopicId = currentTopic.Id,
+                            SortOrder = currentTopic.Lessons.Count + 1
+                        };
+                        db.Lessons.Add(newLesson);
+                        await db.SaveChangesAsync(ct);
+                        currentTopic.Lessons.Add(newLesson);
+                        lessonId = newLesson.Id;
+                    }
+                }
+            }
+
+            var planItem = new TeachingPlanItem
+            {
+                GradeLevelId = req.GradeLevelId,
+                WeekNumber = Math.Clamp(itemReq.WeekNumber, 1, 52),
+                PeriodNumber = Math.Max(1, itemReq.PeriodNumber),
+                PeriodName = !string.IsNullOrWhiteSpace(itemReq.PeriodName) ? itemReq.PeriodName.Trim() : $"{itemReq.PeriodNumber}",
+                Title = itemReq.Title?.Trim() ?? string.Empty,
+                NumberOfPeriods = !string.IsNullOrWhiteSpace(itemReq.NumberOfPeriods) ? itemReq.NumberOfPeriods.Trim() : "1",
+                Equipment = itemReq.Equipment?.Trim() ?? string.Empty,
+                Location = !string.IsNullOrWhiteSpace(itemReq.Location) ? itemReq.Location.Trim() : "Phòng học/Phòng máy",
+                TopicId = topicId,
+                LessonId = lessonId,
+                Notes = itemReq.Notes?.Trim() ?? string.Empty,
+                SortOrder = itemReq.SortOrder > 0 ? itemReq.SortOrder : order++,
+                CreatedAt = now,
+                UpdatedAt = now
+            };
+
+            newItems.Add(planItem);
+        }
+
+        db.TeachingPlanItems.AddRange(newItems);
+        await db.SaveChangesAsync(ct);
+        return newItems.Count;
+    }
+
     public async Task<TeachingPlanItemDto> SavePlanItemAsync(int? id, TeachingPlanItemSaveRequest req, CancellationToken ct)
     {
         TeachingPlanItem entity;
@@ -161,6 +296,19 @@ public sealed class TeachingPlanService(IAppDbContext db) : ITeachingPlanService
 
         db.TeachingPlanItems.Remove(entity);
         await db.SaveChangesAsync(ct);
+    }
+
+    public async Task<int> ClearPlanAsync(int gradeLevelId, CancellationToken ct)
+    {
+        var items = await db.TeachingPlanItems
+            .Where(x => x.GradeLevelId == gradeLevelId)
+            .ToListAsync(ct);
+
+        if (items.Count == 0) return 0;
+
+        db.TeachingPlanItems.RemoveRange(items);
+        await db.SaveChangesAsync(ct);
+        return items.Count;
     }
 
     // ==================== LỚP HỌC ====================

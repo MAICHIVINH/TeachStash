@@ -178,8 +178,10 @@ public interface ITeachingPlanService
     // Khung PPCT
     Task<IReadOnlyList<TeachingPlanItemDto>> GetPlanItemsAsync(int? gradeLevelId, CancellationToken ct);
     Task<int> GenerateFromLessonsAsync(int gradeLevelId, CancellationToken ct);
+    Task<int> ImportPlanItemsAsync(ImportTeachingPlanRequest req, CancellationToken ct);
     Task<TeachingPlanItemDto> SavePlanItemAsync(int? id, TeachingPlanItemSaveRequest req, CancellationToken ct);
     Task DeletePlanItemAsync(int id, CancellationToken ct);
+    Task<int> ClearPlanAsync(int gradeLevelId, CancellationToken ct);
 
     // Lớp học
     Task<IReadOnlyList<TeachingClassDto>> GetClassesAsync(int? gradeLevelId, CancellationToken ct);

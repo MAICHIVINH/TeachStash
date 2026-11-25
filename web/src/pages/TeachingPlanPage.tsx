@@ -27,7 +27,8 @@ import {
   Upload,
   FileCheck,
   Download,
-  RotateCcw
+  RotateCcw,
+  FileUp
 } from 'lucide-react'
 import { api } from '../services/api'
 import { useApp, errText } from '../stores/appStore'
@@ -45,6 +46,7 @@ import {
 } from '../components/ui'
 import DocumentDetail from '../features/documents/DocumentDetail'
 import DocumentForm from '../features/documents/DocumentForm'
+import { ImportTeachingPlanModal } from '../features/teaching-plan/ImportTeachingPlanModal'
 import { exportTeachingPlanToDocx } from '../utils/docxTeachingPlanGenerator'
 import { parsePeriods, formatPeriodsSummary } from '../utils/format'
 import type {
@@ -57,7 +59,7 @@ import type {
 } from '../types'
 
 export default function TeachingPlanPage() {
-  const { lookups, toast, confirm } = useApp()
+  const { lookups, toast, confirm, refreshLookups } = useApp()
   const gradeLevels = lookups?.gradeLevels ?? []
 
   // Khối lớp đang chọn (mặc định khối 10 hoặc khối đầu tiên)
@@ -118,6 +120,10 @@ export default function TeachingPlanPage() {
 
   // Đang khởi tạo nhanh từ bài học
   const [generating, setGenerating] = useState(false)
+  const [clearingPlan, setClearingPlan] = useState(false)
+
+  // Modal nhập PPCT từ file Word (.docx)
+  const [importWordModalOpen, setImportWordModalOpen] = useState(false)
 
   // Load danh sách lớp khi đổi khối
   useEffect(() => {
@@ -413,6 +419,36 @@ export default function TeachingPlanPage() {
     }
   }
 
+  // Xóa toàn bộ kế hoạch dạy học (PPCT) của khối lớp hiện tại
+  const handleClearPlan = async () => {
+    const gl = gradeLevels.find(g => g.id === selectedGradeId)
+    const gradeName = gl?.name ?? `Khối ${selectedGradeId}`
+    const ok = await confirm(
+      `Bạn có chắc chắn muốn xóa toàn bộ kế hoạch dạy học (PPCT) của ${gradeName}? Hành động này sẽ xóa toàn bộ các tiết học đã lập trong khối này và không thể hoàn tác.`,
+      {
+        title: `Xóa toàn bộ PPCT ${gradeName}?`,
+        confirmText: 'Xác nhận xóa hết',
+        danger: true
+      }
+    )
+    if (!ok) return
+
+    setClearingPlan(true)
+    try {
+      const res = await api.clearTeachingPlan(selectedGradeId)
+      toast('success', res.message || `Đã xóa toàn bộ kế hoạch dạy học của ${gradeName}`)
+      if (selectedClassId) {
+        await loadSchedule(selectedClassId)
+      } else {
+        await loadClasses(selectedGradeId)
+      }
+    } catch (e) {
+      toast('error', 'Không thể xóa kế hoạch: ' + errText(e))
+    } finally {
+      setClearingPlan(false)
+    }
+  }
+
   // Xuất Word chuẩn Công văn 5512
   const handleExportWord = async () => {
     const gl = gradeLevels.find(g => g.id === selectedGradeId)
@@ -496,7 +532,7 @@ export default function TeachingPlanPage() {
           countLT += p.lt
           countTH += p.th
         })
-        t.totalPeriodsSummary = formatPeriodsSummary(countLT, countTH)
+        t.totalPeriodsSummary = formatPeriodsSummary(countLT, countTH, t.topicName)
       })
     })
 
@@ -528,6 +564,14 @@ export default function TeachingPlanPage() {
         <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="secondary"
+            onClick={() => setImportWordModalOpen(true)}
+            title="Tải lên file Word (.docx) chứa bảng phân phối chương trình chuẩn Phụ lục 3 (CV 5512)"
+          >
+            <FileUp className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            Nhập file
+          </Button>
+          <Button
+            variant="secondary"
             onClick={handleExportWord}
             title="Xuất bảng Kế hoạch dạy học theo đúng mẫu Phụ lục 3 Công văn 5512 ra file Word (.docx)"
           >
@@ -541,6 +585,16 @@ export default function TeachingPlanPage() {
             title="Tự động lập danh sách 35 tuần từ các bài học Tin học GDPT 2018 theo mẫu chuẩn"
           >
             Khởi tạo nhanh KHGD
+          </Button>
+          <Button
+            variant="danger"
+            onClick={handleClearPlan}
+            loading={clearingPlan}
+            disabled={scheduleItems.length === 0}
+            title="Xóa toàn bộ các tiết học trong khung kế hoạch dạy học của khối lớp này"
+          >
+            <Trash2 className="h-4 w-4" />
+            Xóa toàn bộ KH
           </Button>
           <Button
             variant="primary"
@@ -1549,6 +1603,23 @@ export default function TeachingPlanPage() {
           }}
         />
       )}
+
+      {/* MODAL NHẬP KHUNG PPCT TỪ FILE WORD */}
+      <ImportTeachingPlanModal
+        gradeLevelId={selectedGradeId}
+        gradeLevelName={gradeLevels.find(g => g.id === selectedGradeId)?.name}
+        isOpen={importWordModalOpen}
+        onClose={() => setImportWordModalOpen(false)}
+        onSuccess={() => {
+          toast('success', 'Đã nhập thành công kế hoạch dạy học từ file Word!')
+          refreshLookups()
+          if (selectedClassId) {
+            loadSchedule(selectedClassId)
+          } else {
+            loadClasses(selectedGradeId)
+          }
+        }}
+      />
     </div>
   )
 }

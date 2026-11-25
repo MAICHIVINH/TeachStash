@@ -57,19 +57,17 @@ export function parsePeriods(str?: string | null): { lt: number; th: number; tot
     }
   }
 
-  // Fallback nếu không có ký hiệu LT/TH rõ ràng
-  if (!ltMatches && !thMatches) {
-    const num = parseFloat(clean)
-    if (!isNaN(num)) {
-      if (clean.includes('TH')) th = num
-      else lt = num
-    }
-  }
-
+  // Nếu không chứa ký hiệu LT hoặc TH rõ ràng (ví dụ: "1", "2", "Ôn tập"), không tính vào LT hay TH
   return { lt, th, total: lt + th }
 }
 
-export function formatPeriodsSummary(lt: number, th: number): string {
+export function formatPeriodsSummary(lt: number, th: number, existingTopicName?: string | null): string {
+  // Nếu trong tên chủ đề đã có sẵn số tiết/cơ cấu tiết trong ngoặc đơn (ví dụ: "(10 tiết: 8LT+2TH)" hoặc "(2LT)")
+  // thì giữ nguyên tên từ file Word, không nối thêm
+  if (existingTopicName && /\([^)]*(?:tiết|LT|TH)[^)]*\)/i.test(existingTopicName)) {
+    return ''
+  }
+
   const total = lt + th
   if (total <= 0) return ''
   return ` (${total} tiết: ${lt}LT+${th}TH)`

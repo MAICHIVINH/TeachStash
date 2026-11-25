@@ -7,15 +7,24 @@ export class ApiError extends Error {
 async function request<R>(method: string, url: string, body?: unknown): Promise<R> {
   const headers: Record<string, string> = { 'X-Requested-With': 'GiaoAnTin' }
   let payload: BodyInit | undefined
-  if (body instanceof FormData) payload = body
-  else if (body !== undefined) { headers['Content-Type'] = 'application/json'; payload = JSON.stringify(body) }
+  if (body instanceof FormData)
+    payload = body
+  else if (body !== undefined) {
+    headers['Content-Type'] = 'application/json'; payload = JSON.stringify(body)
+  }
   let res: Response
-  try { res = await fetch(url, { method, headers, body: payload, credentials: 'same-origin' }) }
-  catch { throw new ApiError('Không kết nối được tới máy chủ nội bộ của ứng dụng.', 0) }
-  if (res.status === 204) return undefined as R
+  try {
+    res = await fetch(url, { method, headers, body: payload, credentials: 'same-origin' })
+  } catch {
+    throw new ApiError('Không kết nối được tới máy chủ nội bộ của ứng dụng.', 0)
+  }
+  if (res.status === 204)
+    return undefined as R
   const text = await res.text()
   let data: any = null
-  try { data = text ? JSON.parse(text) : null } catch { /* không phải JSON */ }
+  try {
+    data = text ? JSON.parse(text) : null
+  } catch { /* không phải JSON */ }
   if (!res.ok) {
     if (res.status === 401 && data?.code === 'locked') window.dispatchEvent(new Event('gat-locked'))
     const errorDetails = data?.errors ? Object.values(data.errors).flat().filter(Boolean).join(' ') : null
@@ -97,10 +106,14 @@ export const api = {
     request<T.TeachingPlanItem[]>('GET', '/api/teaching-plan' + qs({ gradeLevelId })),
   generateTeachingPlanFromLessons: (gradeLevelId: number) =>
     request<{ count: number }>('POST', `/api/teaching-plan/generate-from-lessons?gradeLevelId=${gradeLevelId}`),
+  importTeachingPlan: (b: T.ImportTeachingPlanRequest) =>
+    request<{ count: number; message: string }>('POST', '/api/teaching-plan/import', b),
   saveTeachingPlanItem: (id: number | null, b: T.TeachingPlanItemSave) =>
     id ? request<T.TeachingPlanItem>('PUT', `/api/teaching-plan/item/${id}`, b) : request<T.TeachingPlanItem>('POST', '/api/teaching-plan/item', b),
   deleteTeachingPlanItem: (id: number) =>
     request<void>('DELETE', `/api/teaching-plan/item/${id}`),
+  clearTeachingPlan: (gradeLevelId: number) =>
+    request<{ count: number; message: string }>('DELETE', `/api/teaching-plan/clear?gradeLevelId=${gradeLevelId}`),
 
   teachingClasses: (gradeLevelId?: number | null) =>
     request<T.TeachingClass[]>('GET', '/api/teaching-classes' + qs({ gradeLevelId })),

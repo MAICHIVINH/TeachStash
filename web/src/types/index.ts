@@ -159,6 +159,13 @@ export interface TeachingPlanItemSave {
   note?: string | null
   notes?: string | null
   sortOrder?: number
+  topicName?: string | null
+}
+
+export interface ImportTeachingPlanRequest {
+  gradeLevelId: number
+  replaceExisting: boolean
+  items: TeachingPlanItemSave[]
 }
 
 export interface TeachingClass {

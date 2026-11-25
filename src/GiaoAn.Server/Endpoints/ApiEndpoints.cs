@@ -205,6 +205,13 @@ public static class ApiEndpoints
             Results.Ok(await s.GetPlanItemsAsync(gradeLevelId, ct)));
         g.MapPost("/generate-from-lessons", async (int gradeLevelId, ITeachingPlanService s, CancellationToken ct) =>
             Results.Ok(await s.GenerateFromLessonsAsync(gradeLevelId, ct)));
+        g.MapPost("/import", async (ImportTeachingPlanRequest r, ITeachingPlanService s, CancellationToken ct) =>
+        {
+            if (r.GradeLevelId <= 0) return Results.BadRequest(new { error = "Khối lớp không hợp lệ." });
+            if (r.Items == null || r.Items.Count == 0) return Results.BadRequest(new { error = "Danh sách bài dạy không được rỗng." });
+            var count = await s.ImportPlanItemsAsync(r, ct);
+            return Results.Ok(new { count, message = $"Đã nhập thành công {count} tiết/bài học vào khung PPCT." });
+        });
         g.MapPost("/item", async (TeachingPlanItemSaveRequest r, ITeachingPlanService s, CancellationToken ct) =>
             Results.Ok(await s.SavePlanItemAsync(null, r, ct)));
         g.MapPut("/item/{id:int}", async (int id, TeachingPlanItemSaveRequest r, ITeachingPlanService s, CancellationToken ct) =>
@@ -213,6 +220,11 @@ public static class ApiEndpoints
         {
             await s.DeletePlanItemAsync(id, ct);
             return Results.NoContent();
+        });
+        g.MapDelete("/clear", async (int gradeLevelId, ITeachingPlanService s, CancellationToken ct) =>
+        {
+            var count = await s.ClearPlanAsync(gradeLevelId, ct);
+            return Results.Ok(new { count, message = $"Đã xóa toàn bộ {count} tiết của kế hoạch dạy học." });
         });
     }
 

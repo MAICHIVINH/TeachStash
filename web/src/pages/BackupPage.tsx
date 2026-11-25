@@ -391,10 +391,10 @@ export default function BackupPage() {
   return (
     <div className="space-y-6">
       {/* Tiêu đề trang */}
-      <div className="flex flex-col gap-1">
+      {/* <div className="flex flex-col gap-1">
         <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Sao lưu & Phục hồi dữ liệu</h1>
         <p className="text-sm text-slate-500">Bảo vệ an toàn cho giáo án, học liệu và cơ sở dữ liệu của bạn bằng các bản sao lưu định dạng ZIP và đồng bộ đám mây.</p>
-      </div>
+      </div> */}
 
       {/* Card Google Drive Sync (Đồng bộ đám mây) */}
       <section className="rounded-xl border border-sky-200/80 bg-gradient-to-br from-sky-50/70 via-white to-blue-50/40 p-5 shadow-sm dark:border-sky-900/60 dark:from-slate-900 dark:via-slate-900 dark:to-sky-950/20">
@@ -851,7 +851,7 @@ export default function BackupPage() {
         <Modal
           title="Kết nối Google Drive"
           onRequestClose={() => setDriveModalOpen(false)}
-          wide="lg"
+          wide="xl"
         >
           <div className="space-y-4 p-5 text-sm">
             <div className="flex items-start gap-3 rounded-lg bg-sky-50 p-3 text-sky-800 dark:bg-sky-950/60 dark:text-sky-200">
@@ -914,7 +914,7 @@ export default function BackupPage() {
                 </Button>
               </div>
 
-              <div className="rounded-lg bg-amber-50 p-3 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200 space-y-1.5 leading-relaxed border border-amber-200 dark:border-amber-900/60">
+              <div className="rounded-lg border border-amber-200/80 bg-amber-50/70 p-3 text-xs text-amber-900 space-y-1.5 leading-relaxed dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
                 <div className="font-semibold flex items-center justify-between">
                   <span>URI chuyển hướng (Redirect URI) trên máy của bạn:</span>
                   <button
@@ -923,15 +923,16 @@ export default function BackupPage() {
                       navigator.clipboard.writeText('http://127.0.0.1:5080/api/gdrive/callback')
                       toast('success', 'Đã sao chép URI chuyển hướng vào bộ nhớ tạm.')
                     }}
-                    className="text-amber-800 hover:underline dark:text-amber-300 font-medium cursor-pointer"
+                    className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[11px] font-medium text-amber-800 bg-amber-100/80 hover:bg-amber-200/70 dark:text-amber-300 dark:bg-amber-900/50 dark:hover:bg-amber-900/80 transition cursor-pointer"
                   >
+                    <Copy className="h-3 w-3" />
                     Sao chép URI
                   </button>
                 </div>
-                <code className="block bg-amber-100/80 px-2 py-1 rounded font-mono text-[11px] selectable dark:bg-amber-900/50">
+                <code className="block rounded border border-amber-200/60 bg-white/80 px-2.5 py-1.5 font-mono text-[11px] text-amber-900 selectable dark:border-amber-800/50 dark:bg-slate-900/60 dark:text-amber-200">
                   http://127.0.0.1:5080/api/gdrive/callback
                 </code>
-                <p className="text-[11px] text-amber-700 dark:text-amber-300">
+                <p className="text-[11px] text-amber-700/90 dark:text-amber-300/80">
                   Nếu bạn tạo Client ID dạng <strong>Web application</strong>, hãy thêm URI trên vào mục <em>&quot;Authorized redirect URIs&quot;</em> trong Google Cloud Console để tránh lỗi <code>redirect_uri_mismatch</code>.
                 </p>
               </div>
@@ -976,20 +977,32 @@ export default function BackupPage() {
               </div>
 
               <div className="pt-2">
-                <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">
+                <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-400">
                   Hoặc dán Mã xác thực (Authorization Code) vào đây nếu không tự động chuyển hướng:
                 </label>
-                <div className="flex gap-2">
-                  <input
-                    className={inputCls}
-                    placeholder="Dán mã code từ trang Google sau khi đăng nhập..."
-                    value={driveAuthCode}
-                    onChange={e => setDriveAuthCode(e.target.value)}
-                  />
-                  <Button variant="secondary" onClick={handlePasteCode} title="Dán mã từ bộ nhớ tạm">
-                    Dán mã
-                  </Button>
-                  <Button variant="primary" onClick={handleExchangeCode}>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <div className="relative flex-1 min-w-0">
+                    <input
+                      className={`${inputCls} pr-24`}
+                      placeholder="Dán mã code từ trang Google sau khi đăng nhập..."
+                      value={driveAuthCode}
+                      onChange={e => setDriveAuthCode(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={handlePasteCode}
+                      title="Dán mã từ bộ nhớ tạm"
+                      className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 rounded px-2.5 py-1 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 hover:text-slate-900 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition"
+                    >
+                      <Copy className="h-3 w-3" />
+                      Dán mã
+                    </button>
+                  </div>
+                  <Button
+                    variant="primary"
+                    onClick={handleExchangeCode}
+                    className="shrink-0 whitespace-nowrap"
+                  >
                     Hoàn tất kết nối
                   </Button>
                 </div>
